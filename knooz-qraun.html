@@ -147,7 +147,7 @@
                             </div>
 
                             <div class="flex items-center gap-2">
-                                <span id="q-counter" class="text-xs font-black bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">1/15</span>
+                                <span id="q-counter" class="text-xs font-black bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">1/30</span>
                             </div>
                         </div>
 
@@ -202,14 +202,14 @@
             </div>
 
             <h2 class="text-3xl font-black text-amber-300 mb-2">🎉 مبروووووووك يا بطل! 🎉</h2>
-            <p class="text-indigo-200 font-bold text-lg mb-4">لقد أتممت رحلة اكتشاف كنوز القرآن الكريم بنجاح باهر!</p>
+            <p class="text-indigo-200 font-bold text-lg mb-4">لقد أتممت رحلة اكتشاف كنوز القرآن الكريم بنجاح باهر ومراجعة شاملة كاملة!</p>
 
             <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-6 border border-white/20">
                 <p class="text-amber-200 font-extrabold text-sm mb-1">النتيجة النهائية:</p>
                 <div class="text-4xl font-black text-white flex items-center justify-center gap-2">
-                    <span id="final-score">15</span> <span class="text-amber-400 text-2xl">/ 15</span> ⭐
+                    <span id="final-score">30</span> <span class="text-amber-400 text-2xl">/ 30</span> ⭐
                 </div>
-                <p id="victory-badge-text" class="text-xs text-emerald-300 font-bold mt-2">✨ بطل ممتاز وحافظ لكنوز القرآن! ✨</p>
+                <p id="victory-badge-text" class="text-xs text-emerald-300 font-bold mt-2">✨ بطل محترف وحافظ متقن لكل كنوز القصة والقرآن! ✨</p>
             </div>
 
             <button onclick="restartGameFromVictory()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-indigo-950 font-black py-4 px-6 rounded-2xl shadow-xl transition-all transform active:scale-95 text-lg flex items-center justify-center gap-2">
@@ -248,12 +248,12 @@
             "المعلم أكمل": { normal: "images/akmal.jpg", surprised: "images/akmal.jpg" }
         };
 
-        /* GAME DATA DEFINITION */
+        /* GAME DATA DEFINITION - 30 FULL REVISION QUESTIONS */
         const baseQuestions = [
             {
                 id: 1,
                 charName: "سلمان",
-                question: "عندما ضل سلمان طريقه في الصحراء وحاول الاتصال بوالدته، لماذا لم يلتقط هاتفه المحمول أي شبكة؟",
+                question: "عندما ضل سلمان طريقه في الصحراء وحاول الاتصال بوالدته، لماذا لم يلتقط هاتفه أي شبكة؟",
                 rawOptions: [
                     "لأن الهاتف كان مغلقاً تماماً",
                     "لأن الهاتف كان خارج تغطية الشبكة في الصحراء",
@@ -264,7 +264,7 @@
             {
                 id: 2,
                 charName: "سلمان",
-                question: "عندما كان سلمان تائهاً في الظلام ومعه هاتفه، تمنى وجود أداة لمعرفة اتجاه الشمال وأداة للإنارة، فما هما اللتان اكتشف وجودهما لاحقاً في هاتفه؟",
+                question: "عندما كان سلمان تائهاً في الظلام ومعه هاتفه، تمنى وجود أداة لمعرفة اتجاه الشمال وأداة للإنارة، فما هما اللتان اكتشف وجودهما لاحقاً؟",
                 rawOptions: [
                     "لعبة إلكترونية وراديو",
                     "البوصلة والتطبيق المضيء (الكشاف)",
@@ -414,6 +414,171 @@
                     "الذين يحفظون أسماء البلدان وحدها"
                 ],
                 correctIndex: 1
+            },
+            {
+                id: 16,
+                charName: "سلمان",
+                question: "كيف كان موقف سلمان بعد أن أدرك أن كشاف وبوصلة الهاتف كانا معه طوال الوقت دون علمه؟",
+                rawOptions: [
+                    "شعر بالندم الشديد والتأسف لأنه لم يستكشف إمكانيات هاتفه القريب منه سابقاً",
+                    "فرح لأنه لم يتصل بأحد",
+                    "قرر أن يترك هاتفه في الصحراء"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 17,
+                charName: "المعلم أكمل",
+                question: "ما الشبه بين من يملك مصحفاً دون تدبره وبين من يملك هاتفاً ذكياً تائهاً في الصحراء؟",
+                rawOptions: [
+                    "كلاهما يملك أداة نجاة عظيمة ولكنه يحرم نفسه من الفائدة لعدم الاستكشاف والعمل بها",
+                    "لا يوجد أي تشابه بينهما",
+                    "كلاهما لا يحتاج إلى القراءة إطلاقاً"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 18,
+                charName: "تامر",
+                question: "كيف يبعث القرآن الكريم النور في حياة المسلم كما تمنى تامر؟",
+                rawOptions: [
+                    "ينير عقله وقلبه بالحق، ويدد ظلمات الحيرة والشك والجهل",
+                    "يجعل عينيه تضيء باللون الأزرق",
+                    "يعطيه مصباحاً يدوياً كبيراً"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 19,
+                charName: "ريحان",
+                question: "ما الأثر الجميل الذي يتركه تدبر آيات القرآن في سلوك الطفل وأخلاقه؟",
+                rawOptions: [
+                    "يصبح أكثر برّاً بوالديه وأحسن خلقاً وأعلى همة وأ طيب لساناً",
+                    "يصبح يحب العزلة ولا يتحدث مع أحد",
+                    "يجعله ينقاد وراء كل ما يسمعه دون تفكير"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 20,
+                charName: "حنظل",
+                question: "ماذا يقصد بالهداية في قول الله تعالى: (إن هذا القرآن يهدي للتي هي أقوم)؟",
+                rawOptions: [
+                    "المرور من الطرقات الضيقة فقط",
+                    "الإرشاد لأصحّ وأفضل وأعدل الطرق والأخلاق والأعمال في كل أمور الحياة",
+                    "معرفة الطريق إلى السوق فقط"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 21,
+                charName: "المعلم أكمل",
+                question: "ما الواجب على من يستمع لقصة سلمان وأصدقائه تجاه المصحف الشريف؟",
+                rawOptions: [
+                    "أن يجعل للقرآن وقتاً يومياً للتدبر والحفظ والتعلم والعمل بآياته",
+                    "أن يكتفي بوضعه على الرف زينة للمنزل",
+                    "أن يقرأه مرة واحدة في السنة فقط"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 22,
+                charName: "كامل",
+                question: "لماذا وصف النبي ﷺ حافظ القرآن الكريم وقارئه بالـ (أترجة)؟",
+                rawOptions: [
+                    "لأن طعمها طيب وريحها طيب، يجمع بين القراءة والإيمان والأخلاق",
+                    "لأنها ثمرة صلبة جداً",
+                    "لأنها تنمو في الصحراء فقط"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 23,
+                charName: "سلمان",
+                question: "ما هي الأداة التي تستخرج بها الكنوز من القرآن الكريم كما استخرج سلمان البوصلة من هاتفه؟",
+                rawOptions: [
+                    "التفكر والتدبر وسؤال أهل العلم والعمل بالآيات",
+                    "القراءة السريعة دون فهم",
+                    "إغلاق المصحف دائماً"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 24,
+                charName: "تامر",
+                question: "ما جزاء من قرأ حرفاً واحداً من كتاب الله عز وجل كما تعلمنا؟",
+                rawOptions: [
+                    "له به حسنة، والحسنة بعشر أمثالها",
+                    "يحصل على حسنة واحدة لا غير",
+                    "لا يحصل على شيء حتى يكمل السورة كاملة"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 25,
+                charName: "ريحان",
+                question: "ما معنى 'الشفاء لما في الصدور' في وصف الله تعالى للقرآن الكريم؟",
+                rawOptions: [
+                    "شفاء أمراض القلوب كالحسد والغل والحزن والخوف والشبهات",
+                    "شفاء الكسور في العظام فقط",
+                    "زيادة سرعة دقات القلب أثناء الجري"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 26,
+                charName: "حنظل",
+                question: "ماذا يقصد بأن القرآن 'حبل الله المتين'؟",
+                rawOptions: [
+                    "من تمسك به وعمل بآياته نجا وهُدي إلى الصراط المستقيم",
+                    "أنه حبل قوي مصنوع من ألياف الصحراء",
+                    "أنه أداة لربط الأمتعة أثناء السفر"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 27,
+                charName: "كامل",
+                question: "كيف تكون صحبة القرآن الكريم في القبر وجميع المواقف الصعبة؟",
+                rawOptions: [
+                    "يأتي القرآن لشفيعه وم صاحبه محاجّاً عنه ومؤنساً له في ظلمات القبر",
+                    "ينساه المصحف فور وفاة الإنسان",
+                    "يترك صاحب القرآن دون نصرة"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 28,
+                charName: "سلمان",
+                question: "ما أول خطوة عملية يجب أن يبدأ بها الطفل حتى لا يكون كسلمان في أول قصته؟",
+                rawOptions: [
+                    "فتح المصحف بانتظام والتعرف على معاني الآيات العظيمة واستخراج كنوزها",
+                    "الانتظار حتى يكبر في السن كلياً",
+                    "عدم محاولة قراءة المصحف إطلاقاً"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 29,
+                charName: "تامر",
+                question: "بماذا يشعر الإنسان عندما يستمع للقرآن الكريم بقلب حاضر وخاشع؟",
+                rawOptions: [
+                    "بالسعادة والسكينة والراحة النفسية العميقة",
+                    "بالخوف الشديد والقلق المستمر",
+                    "بالملل والنوم الفوري"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 30,
+                charName: "المعلم أكمل",
+                question: "ما الشعار الذي اتفق عليه جميع أبطال قصتنا (سلمان وكامل وتامر وريحان وحنظل والمعلم أكمل)؟",
+                rawOptions: [
+                    "القرآن هو نورنا وكنزنا وعزّنا ونحن أبطاله الحافظون العاملون به!",
+                    "التركيز على اللعب بالهاتف طوال اليوم",
+                    "السفر دائماً في الصحراء بدون خريطة"
+                ],
+                correctIndex: 0
             }
         ];
 
@@ -424,7 +589,6 @@
         let isFlipped = false;
         let isAnsweredCurrent = false;
 
-        /* AUDIO SYNTHESIZER FOR SOUND EFFECTS */
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(type) {
@@ -684,20 +848,6 @@
             });
 
             openModal('modal-uploader');
-        }
-
-        function handleFileUpload(event, charName, type) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                characterImages[charName][type] = e.target.result;
-                saveCharacterImages();
-                loadQuestion(currentQuestionIndex);
-                openImageUploader();
-            };
-            reader.readAsDataURL(file);
         }
 
         /* CONFETTI CELEBRATION EFFECT ON ANSWERS & VICTORY */

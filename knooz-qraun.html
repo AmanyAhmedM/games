@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رحلة اكتشاف كنوز القرآن - لعبة تفاعلية للأطفال</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Tajawal', sans-serif;
+            user-select: none;
+        }
+
+        .card-perspective {
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        .bounce-element {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+        }
+
+        .pulse-gold {
+            animation: pulseGold 1.5s infinite alternate;
+        }
+
+        @keyframes pulseGold {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            100% { transform: scale(1.05); box-shadow: 0 0 25px 10px rgba(245, 158, 11, 0.2); }
+        }
+
+        .game-card-bg {
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+        }
+
+        canvas#confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden">
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <header class="w-full bg-white/80 backdrop-blur-md shadow-lg p-4 sticky top-0 z-40 border-b-4 border-amber-400">
+        <div class="max-w-4xl mx-auto flex justify-between items-center px-2">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="bg-amber-400 p-3 rounded-2xl shadow-md text-white floating">
+                    <i class="fa-solid fa-book-quran text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl md:text-2xl text-indigo-900">رحلة اكتشاف كنوز القرآن</h1>
+                    <p class="text-xs md:text-sm text-indigo-600 font-bold">لعبة البطاقات التفاعلية للأبطال</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-50 border-2 border-indigo-200 px-4 py-2 rounded-2xl flex items-center gap-2 shadow-inner">
+                    <i class="fa-solid fa-star text-amber-400 text-xl animate-pulse"></i>
+                    <span id="score" class="font-black text-xl text-indigo-800">0</span>
+                    <span class="text-xs text-indigo-400">/ 15</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="max-w-4xl mx-auto mt-3 bg-gray-200 h-3 rounded-full overflow-hidden shadow-inner">
+            <div id="progress-bar" class="bg-gradient-to-r from-amber-400 to-emerald-400 h-full w-0 transition-all duration-500 rounded-full"></div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto w-full px-4 py-6 flex-1 flex flex-col justify-center items-center relative">
+
+        <!-- Question Card Box -->
+        <div class="w-full mb-6">
+            <div id="card-container" class="card-perspective w-full h-[460px] cursor-pointer">
+                <div id="card-inner" class="card-inner relative w-full h-full shadow-2xl rounded-3xl border-4 border-white/80">
+                    
+                    <!-- Card Front (Click to Reveal) -->
+                    <div class="card-front absolute w-full h-full bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700 text-white rounded-3xl p-6 flex flex-col justify-center items-center text-center shadow-inner overflow-hidden">
+                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+                        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-amber-400/20 rounded-full blur-xl"></div>
+                        
+                        <div class="bg-amber-400 text-indigo-950 font-black px-4 py-1.5 rounded-full text-sm mb-4 shadow-md bounce-element flex items-center gap-2">
+                            <i class="fa-solid fa-hand-pointer"></i> اضغط هنا لقلب البطاقة!
+                        </div>
+                        
+                        <div class="text-6xl mb-3 text-amber-300 floating">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                        <h2 class="text-2xl font-black mb-1 text-amber-200">البطاقة رقم <span id="current-question-num">1</span></h2>
+                        <p class="text-indigo-100 text-sm">اكتشف السؤال واختبر معرفتك الكبيرة!</p>
+                    </div>
+
+                    <!-- Card Back (Question & Character Display) -->
+                    <div class="card-back absolute w-full h-full bg-white rounded-3xl p-5 md:p-6 flex flex-col justify-between shadow-inner border-2 border-indigo-100 overflow-y-auto">
+                        
+                        <div class="flex items-center justify-between border-b border-indigo-100 pb-3">
+                            <!-- Character Badge with Real Image Avatar -->
+                            <div class="flex items-center gap-3">
+                                <div id="char-avatar-box" class="w-16 h-16 rounded-2xl bg-amber-100 border-2 border-amber-300 flex items-center justify-center p-0.5 shadow-sm transform hover:scale-110 transition-transform overflow-hidden relative shrink-0">
+                                    <img id="char-img-normal" src="" alt="صورة البطل" class="w-full h-full object-cover rounded-xl" onerror="this.onerror=null; this.src='https://placehold.co/150x150/fde047/1e1b4b?text=صورة+البطل';">
+                                </div>
+                                <div>
+                                    <span class="text-xs text-indigo-400 font-bold block">شخصية السؤال:</span>
+                                    <span id="char-name" class="font-extrabold text-indigo-900 text-lg">سلمان</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <span id="q-counter" class="text-xs font-black bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">1/15</span>
+                            </div>
+                        </div>
+
+                        <!-- Question Content -->
+                        <div class="my-3">
+                            <h3 id="question-text" class="text-lg md:text-xl font-black text-indigo-950 leading-relaxed">
+                                جارٍ تحميل السؤال...
+                            </h3>
+                        </div>
+
+                        <!-- Answer Options -->
+                        <div id="options-container" class="grid grid-cols-1 gap-2.5">
+                            <!-- Options rendered dynamically -->
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Wrong Answer Modal -->
+    <div id="modal-wrong" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full text-center shadow-2xl border-4 border-rose-400 relative overflow-hidden transform transition-all">
+            <!-- Surprised Character Image Avatar -->
+            <div class="w-28 h-28 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-3 border-4 border-rose-200 animate-bounce shadow-md p-1 overflow-hidden relative">
+                <img id="modal-wrong-img" src="" alt="صورة البطل مندهش" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://placehold.co/200x200/fca5a5/1e1b4b?text=صورة+مندهش'">
+            </div>
+            <h3 class="text-xl font-black text-rose-600 mb-1">
+                <span id="modal-wrong-char-name" class="text-indigo-950">سلمان</span> مندهش جداً!
+            </h3>
+            <p id="modal-wrong-text" class="text-gray-600 font-bold text-sm mb-5 leading-relaxed">
+                البطل <span id="modal-wrong-char-inline" class="text-rose-600 font-extrabold">سلمان</span> متعجب من هذه الإجابة! فكّر جيداً معه وحاول مجدداً!
+            </p>
+            
+            <button onclick="closeModal('modal-wrong')" class="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 text-base">
+                سأحاول مجدداً يا بطل <i class="fa-solid fa-rotate-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Grand Victory Celebration Modal -->
+    <div id="modal-victory" class="fixed inset-0 bg-indigo-950/80 backdrop-blur-md hidden justify-center items-center z-50 p-4">
+        <div class="bg-gradient-to-b from-indigo-900 via-purple-900 to-slate-900 rounded-3xl p-6 md:p-8 max-w-lg w-full text-center shadow-2xl border-4 border-amber-400 relative overflow-hidden text-white pulse-gold">
+            <div class="absolute -top-20 -left-20 w-40 h-40 bg-amber-400/20 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-pink-500/20 rounded-full blur-3xl"></div>
+
+            <div class="w-24 h-24 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-xl floating">
+                <i class="fa-solid fa-trophy text-indigo-950 text-5xl"></i>
+            </div>
+
+            <h2 class="text-3xl font-black text-amber-300 mb-2">🎉 مبروووووووك يا بطل! 🎉</h2>
+            <p class="text-indigo-200 font-bold text-lg mb-4">لقد أتممت رحلة اكتشاف كنوز القرآن الكريم بنجاح باهر!</p>
+
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-6 border border-white/20">
+                <p class="text-amber-200 font-extrabold text-sm mb-1">النتيجة النهائية:</p>
+                <div class="text-4xl font-black text-white flex items-center justify-center gap-2">
+                    <span id="final-score">15</span> <span class="text-amber-400 text-2xl">/ 15</span> ⭐
+                </div>
+                <p id="victory-badge-text" class="text-xs text-emerald-300 font-bold mt-2">✨ بطل ممتاز وحافظ لكنوز القرآن! ✨</p>
+            </div>
+
+            <button onclick="restartGameFromVictory()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-indigo-950 font-black py-4 px-6 rounded-2xl shadow-xl transition-all transform active:scale-95 text-lg flex items-center justify-center gap-2">
+                اللعب مرة أخرى 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- Character Image Upload Modal -->
+    <div id="modal-uploader" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border-4 border-indigo-400 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-lg font-black text-indigo-900"><i class="fa-solid fa-images text-amber-500"></i> تحديد صور الأبطال من جهازك</h3>
+                <button onclick="closeModal('modal-uploader')" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            </div>
+            <p class="text-xs text-gray-500 font-bold mb-4">اختاري صور الشخصيات الموجودة على جهازك لتثبت بالكامل وبدون أي اختفاء وتظهر بجانب كل سؤال دائماً:</p>
+
+            <div id="upload-characters-list" class="space-y-4 text-sm">
+                <!-- Dynamically populated character image upload slots -->
+            </div>
+
+            <button onclick="closeModal('modal-uploader')" class="mt-5 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-2xl shadow-md transition-all">
+                حفظ وإغلاق
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Local relative file paths pointing to images inside the 'images' folder
+        const characterImagePathMap = {
+            "سلمان": { normal: "images/salman.jpg", surprised: "images/salman.jpg" },
+            "كامل": { normal: "images/kamel.jpg", surprised: "images/kamel.jpg" },
+            "تامر": { normal: "images/tamer.jpg", surprised: "images/tamer.jpg" },
+            "ريحان": { normal: "images/reihan.jpg", surprised: "images/reihan.jpg" },
+            "حنظل": { normal: "images/hanzal.jpg", surprised: "images/hanzal.jpg" },
+            "المعلم أكمل": { normal: "images/akmal.jpg", surprised: "images/akmal.jpg" }
+        };
+
+        /* GAME DATA DEFINITION */
+        const baseQuestions = [
+            {
+                id: 1,
+                charName: "سلمان",
+                question: "عندما ضل سلمان طريقه في الصحراء وحاول الاتصال بوالدته، لماذا لم يلتقط هاتفه المحمول أي شبكة؟",
+                rawOptions: [
+                    "لأن الهاتف كان مغلقاً تماماً",
+                    "لأن الهاتف كان خارج تغطية الشبكة في الصحراء",
+                    "لأن بطارية الهاتف نفدت بالكامل"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 2,
+                charName: "سلمان",
+                question: "عندما كان سلمان تائهاً في الظلام ومعه هاتفه، تمنى وجود أداة لمعرفة اتجاه الشمال وأداة للإنارة، فما هما اللتان اكتشف وجودهما لاحقاً في هاتفه؟",
+                rawOptions: [
+                    "لعبة إلكترونية وراديو",
+                    "البوصلة والتطبيق المضيء (الكشاف)",
+                    "طعام وشراب وخريطة ورقية"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 3,
+                charName: "المعلم أكمل",
+                question: "ما العبرة التي نتعلمها من قصة سلمان وهاتفه الذكي الذي كان يحوي البوصلة والكشاف دون أن يدري؟",
+                rawOptions: [
+                    "ألا نستخدم الهواتف المحمولة في السفر",
+                    "ألا نغفل عن استكشاف الكنوز والفوائد النافعة القريبة منا (كالقرآن والهاتف) قبل فوات الأوان",
+                    "أن نسافر دائماً بمفردنا في الصحراء"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 4,
+                charName: "كامل",
+                question: "بماذا شبّه 'كامل' الهاتف المحمول في القصة كلاً من (سلمان، والهاتف المحمول، والأُم)؟",
+                rawOptions: [
+                    "سلمان يشبه المعلم، والهاتف يشبه الكتاب، والأم تشبه المدرسة",
+                    "سلمان يشبهنا نحن، والهاتف المحمول يشبه القرآن، والأُم تشبه المعلم والربانيين",
+                    "الصحراء تشبه المدينة، والهاتف يشبه التلفاز"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 5,
+                charName: "ريحان",
+                question: "ما معنى كلمة 'تثوير القرآن' كما ذكر الصحابي الجليل عبد الله بن مسعود رضي الله عنه؟",
+                rawOptions: [
+                    "حفظ آيات القرآن فقط دون فهمها",
+                    "البحث في القرآن وعَنْهُ وحولَهُ لأجل اكتشاف كنوزه وما فيه من خير",
+                    "وضع المصحف في مكتبة فاخرة دون قراءة"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 6,
+                charName: "كامل",
+                question: "من أمنيات 'كامل' أن يكون من أقرب الناس إلى الله، فكيف يحقق القرآن الكريم ذلك؟",
+                rawOptions: [
+                    "بأن يكون من 'أهل القرآن' الذين هم أهل الله وخاصته",
+                    "بأن يجمع الأموال الكثيرة في الدنيا",
+                    "بأن ينام طوال النهار والليل"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 7,
+                charName: "كامل",
+                question: "كيف يُكرم القرآن والدا حافظ القرآن الكريم يوم القيامة؟",
+                rawOptions: [
+                    "يُعطيان سيارة فخمة في الدنيا",
+                    "يُكسى والداه حلتين لا تقوم لهما الدنيا، ويقال لهما بأخذ ولدكما القرآن",
+                    "يُمنحان قصراً كبيراً بناءً على أثاثه"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 8,
+                charName: "تامر",
+                question: "تمنى 'تامر' أن يكون سعيداً وأن يعرف الصواب دائماً، أين وجد طريق ذلك في القرآن؟",
+                rawOptions: [
+                    "في قصص الأمم السابقة فقط",
+                    "في قوله تعالى: (فمن اتبع هداي فلا يضل ولا يشقى)",
+                    "في عدد صفحات المصحف"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 9,
+                charName: "ريحان",
+                question: "تمنى 'ريحان' أن يزيد إيمانه ويتغير للأفضل، كيف يصنع القرآن ذلك بالنفوس؟",
+                rawOptions: [
+                    "يزكي النفوس أي يطهرها ويطورها للأفضل",
+                    "يمنع الإنسان من القراءة تماماً",
+                    "يعلمنا لغات أجنبية مختلفة فقط"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 10,
+                charName: "حنظل",
+                question: "لماذا وصف الله تعالى القرآن بأنه (روح) عندما تمنى حنظل إرادة وقوة همة؟",
+                rawOptions: [
+                    "لأنه يكتب بخط جميل جداً",
+                    "لأن القرآن للقلب كالروح للجسد يمثل الحياة ويرفع الهمة والعزيمة",
+                    "لأنه يقرأ بصوت مرتفع فقط"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 11,
+                charName: "حنظل",
+                question: "عندما تمنى حنظل الطمأنينة والأمان والتخلص من القلق، ما الآية التي وجدها؟",
+                rawOptions: [
+                    "قوله تعالى: (ألا بذكر الله تطمئن القلوب)",
+                    "قوله تعالى: (اقرأ باسم ربك الذي خلق)",
+                    "قوله تعالى: (إنا أعطيناك الكوثر)"
+                ],
+                correctIndex: 0
+            },
+            {
+                id: 12,
+                charName: "المعلم أكمل",
+                question: "ما معنى 'الذكر' في قول الله تعالى: (لقد أنزلنا إليكم كتاباً فيه ذكركم)؟",
+                rawOptions: [
+                    "حفظ الأعداد والأرقام الرياضية",
+                    "الشرف والرفعة والكرامة في العناية بالقرآن",
+                    "كثرة الكلام الحديث مع الناس"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 13,
+                charName: "تامر",
+                question: "في دعاء النبي ﷺ لذهاب الهم والحزن، ماذا نطلب أن يجعل الله القرآن الكريم لنا؟",
+                rawOptions: [
+                    "مصباحاً في ظلام الليل فقط",
+                    "ربيع قلبي، ونور صدري، وجلاء حُزني، وذهاب همي",
+                    "سبباً لجمع الأموال والمتاع"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 14,
+                charName: "ريحان",
+                question: "ما الفرق بين 'العلاج' و'الشفاء' كما تعلم ريحان من وصف القرآن بأنه شفاء؟",
+                rawOptions: [
+                    "لا يوجد أي فرق بينهما مطلقاً",
+                    "العلاج قد يشفي وقد لا يشفي، أما الشفاء فهو تمام العافية وزوال المرض بالكلية",
+                    "الشفاء يكون بالأدوية فقط"
+                ],
+                correctIndex: 1
+            },
+            {
+                id: 15,
+                charName: "كامل",
+                question: "من هم 'الربانيون' كما ورد في القرآن الكريم؟",
+                rawOptions: [
+                    "الذين يبنون البيوت الكبيرة في الصحراء",
+                    "الذين اجتهدوا في التعلم والعمل بما تعلموه وتعليمه لغيرهم",
+                    "الذين يحفظون أسماء البلدان وحدها"
+                ],
+                correctIndex: 1
+            }
+        ];
+
+        /* GAME STATE VARIABLES */
+        let preparedQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isFlipped = false;
+        let isAnsweredCurrent = false;
+
+        /* AUDIO SYNTHESIZER FOR SOUND EFFECTS */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'flip') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } else if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(160, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'fanfare') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.type = 'triangle';
+                        o.frequency.setValueAtTime(freq, audioCtx.currentTime + (idx * 0.12));
+                        g.gain.setValueAtTime(0.3, audioCtx.currentTime + (idx * 0.12));
+                        g.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + (idx * 0.12) + 0.3);
+                        o.start(audioCtx.currentTime + (idx * 0.12));
+                        o.stop(audioCtx.currentTime + (idx * 0.12) + 0.3);
+                    });
+                }
+            } catch(e) {
+                // Sound fallback
+            }
+        }
+
+        window.onload = function() {
+            initGame();
+
+            document.getElementById('card-container').addEventListener('click', function(e) {
+                if (!isFlipped) {
+                    flipCard();
+                }
+            });
+        };
+
+        /* SHUFFLE OPTIONS FUNCTION TO ENSURE RANDOM ANSWER PLACEMENT */
+        function prepareQuestionsData() {
+            preparedQuestions = baseQuestions.map(q => {
+                const correctText = q.rawOptions[q.correctIndex];
+                
+                // Shuffle options array using Fisher-Yates
+                let shuffledOptions = [...q.rawOptions];
+                for (let i = shuffledOptions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+                }
+
+                // Find new correct index
+                const newCorrectIndex = shuffledOptions.indexOf(correctText);
+
+                return {
+                    id: q.id,
+                    charName: q.charName,
+                    question: q.question,
+                    options: shuffledOptions,
+                    correct: newCorrectIndex
+                };
+            });
+        }
+
+        function initGame() {
+            prepareQuestionsData();
+            currentQuestionIndex = 0;
+            score = 0;
+            updateUI();
+            loadQuestion(currentQuestionIndex);
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            const progress = (currentQuestionIndex / preparedQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+
+        function loadQuestion(index) {
+            isFlipped = false;
+            isAnsweredCurrent = false;
+
+            const cardInner = document.getElementById('card-inner');
+            cardInner.classList.remove('flipped');
+
+            const q = preparedQuestions[index];
+            document.getElementById('current-question-num').textContent = index + 1;
+            document.getElementById('q-counter').textContent = `${index + 1}/${preparedQuestions.length}`;
+            document.getElementById('char-name').textContent = q.charName;
+            
+            // Set image path based on character name from local folder
+            const charImgs = characterImagePathMap[q.charName] || { normal: `images/${q.charName}.jpg`, surprised: `images/${q.charName}.jpg` };
+            const imgNormalEl = document.getElementById('char-img-normal');
+            
+            imgNormalEl.src = charImgs.normal;
+            imgNormalEl.onerror = function() {
+                this.onerror = null;
+                this.src = `https://placehold.co/150x150/fde047/1e1b4b?text=${encodeURIComponent(q.charName)}`;
+            };
+
+            document.getElementById('question-text').textContent = q.question;
+
+            // Render Options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((optText, optIdx) => {
+                const btn = document.createElement('button');
+                btn.className = `game-card-bg hover:opacity-90 text-indigo-950 font-extrabold p-3.5 rounded-2xl shadow-md border-2 border-white/60 hover:border-amber-300 transition-all transform active:scale-95 text-right flex items-center justify-between group`;
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    handleAnswer(optIdx);
+                };
+
+                btn.innerHTML = `
+                    <span class="text-sm md:text-base leading-snug">${optText}</span>
+                    <span class="w-7 h-7 rounded-xl bg-white/70 group-hover:bg-amber-400 group-hover:text-white flex items-center justify-center text-xs font-black shrink-0 mr-2 transition-colors">
+                        ${optIdx + 1}
+                    </span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function flipCard() {
+            if (isFlipped) return;
+            isFlipped = true;
+            playSound('flip');
+            document.getElementById('card-inner').classList.add('flipped');
+        }
+
+        function handleAnswer(selectedIndex) {
+            if (!isFlipped) {
+                flipCard();
+                setTimeout(() => checkAnswer(selectedIndex), 400);
+            } else {
+                checkAnswer(selectedIndex);
+            }
+        }
+
+        function checkAnswer(selectedIndex) {
+            const q = preparedQuestions[currentQuestionIndex];
+
+            if (selectedIndex === q.correct) {
+                playSound('correct');
+                if (!isAnsweredCurrent) {
+                    score++;
+                    isAnsweredCurrent = true;
+                    document.getElementById('score').textContent = score;
+                }
+                triggerConfetti(60);
+                setTimeout(() => nextQuestionDirectly(), 800);
+            } else {
+                playSound('wrong');
+                
+                // Set character image for wrong answer modal from local path
+                const charImgs = characterImagePathMap[q.charName] || { normal: `images/${q.charName}.jpg`, surprised: `images/${q.charName}.jpg` };
+                const imgWrongEl = document.getElementById('modal-wrong-img');
+                
+                imgWrongEl.src = charImgs.surprised || charImgs.normal;
+                imgWrongEl.onerror = function() {
+                    this.onerror = null;
+                    this.src = `https://placehold.co/200x200/fca5a5/1e1b4b?text=${encodeURIComponent(q.charName)}`;
+                };
+
+                document.getElementById('modal-wrong-char-name').textContent = q.charName;
+                document.getElementById('modal-wrong-char-inline').textContent = q.charName;
+                
+                openModal('modal-wrong');
+            }
+        }
+
+        function nextQuestionDirectly() {
+            if (currentQuestionIndex < preparedQuestions.length - 1) {
+                currentQuestionIndex++;
+                updateUI();
+                loadQuestion(currentQuestionIndex);
+            } else {
+                showVictoryModal();
+            }
+        }
+
+        function showVictoryModal() {
+            playSound('fanfare');
+            triggerConfetti(250);
+
+            // Repeat confetti bursts for grand feel
+            setTimeout(() => triggerConfetti(150), 600);
+            setTimeout(() => triggerConfetti(150), 1200);
+
+            document.getElementById('final-score').textContent = score;
+            openModal('modal-victory');
+        }
+
+        function restartGameFromVictory() {
+            closeModal('modal-victory');
+            initGame();
+        }
+
+        /* MODAL HANDLERS */
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('flex');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('flex');
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function openImageUploader() {
+            const list = document.getElementById('upload-characters-list');
+            list.innerHTML = '';
+
+            const charNames = Object.keys(characterImagePathMap);
+            charNames.forEach(name => {
+                const item = document.createElement('div');
+                item.className = "p-3 bg-gray-50 rounded-2xl border border-gray-200 space-y-2";
+                
+                const charImgs = characterImagePathMap[name] || { normal: "", surprised: "" };
+                
+                item.innerHTML = `
+                    <div class="font-extrabold text-indigo-900 border-b pb-1 text-sm flex justify-between items-center">
+                        <span>البطل: ${name}</span>
+                        <span class="text-xs text-emerald-600 font-bold">مسار الصورة: ${charImgs.normal}</span>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+
+            openModal('modal-uploader');
+        }
+
+        function handleFileUpload(event, charName, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                characterImages[charName][type] = e.target.result;
+                saveCharacterImages();
+                loadQuestion(currentQuestionIndex);
+                openImageUploader();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /* CONFETTI CELEBRATION EFFECT ON ANSWERS & VICTORY */
+        function triggerConfetti(count = 60) {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#fde047', '#38bdf8', '#a855f7', '#4ade80', '#fb7185', '#f59e0b', '#ec4899'];
+
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+                    y: canvas.height / 2 - 50,
+                    vx: (Math.random() - 0.5) * 16,
+                    vy: (Math.random() - 0.8) * 16,
+                    size: Math.random() * 9 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1,
+                    rotation: Math.random() * 360
+                });
+            }
+
+            let frame = 0;
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.35;
+                    p.alpha -= 0.012;
+
+                    ctx.globalAlpha = Math.max(0, p.alpha);
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                frame++;
+                if (frame < 90) {
+                    requestAnimationFrame(animate);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+            animate();
+        }
+    </script>
+</body>
+</html>

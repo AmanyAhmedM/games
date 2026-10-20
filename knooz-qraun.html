@@ -97,7 +97,7 @@
                 <div class="bg-indigo-50 border-2 border-indigo-200 px-4 py-2 rounded-2xl flex items-center gap-2 shadow-inner">
                     <i class="fa-solid fa-star text-amber-400 text-xl animate-pulse"></i>
                     <span id="score" class="font-black text-xl text-indigo-800">0</span>
-                    <span class="text-xs text-indigo-400">/ 15</span>
+                    <span class="text-xs text-indigo-400">/ 30</span>
                 </div>
             </div>
         </div>
@@ -214,25 +214,6 @@
 
             <button onclick="restartGameFromVictory()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-indigo-950 font-black py-4 px-6 rounded-2xl shadow-xl transition-all transform active:scale-95 text-lg flex items-center justify-center gap-2">
                 اللعب مرة أخرى 🚀
-            </button>
-        </div>
-    </div>
-
-    <!-- Character Image Upload Modal -->
-    <div id="modal-uploader" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden justify-center items-center z-50 p-4">
-        <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border-4 border-indigo-400 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="text-lg font-black text-indigo-900"><i class="fa-solid fa-images text-amber-500"></i> تحديد صور الأبطال من جهازك</h3>
-                <button onclick="closeModal('modal-uploader')" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-            </div>
-            <p class="text-xs text-gray-500 font-bold mb-4">اختاري صور الشخصيات الموجودة على جهازك لتثبت بالكامل وبدون أي اختفاء وتظهر بجانب كل سؤال دائماً:</p>
-
-            <div id="upload-characters-list" class="space-y-4 text-sm">
-                <!-- Dynamically populated character image upload slots -->
-            </div>
-
-            <button onclick="closeModal('modal-uploader')" class="mt-5 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-2xl shadow-md transition-all">
-                حفظ وإغلاق
             </button>
         </div>
     </div>
@@ -552,7 +533,7 @@
                 charName: "سلمان",
                 question: "ما أول خطوة عملية يجب أن يبدأ بها الطفل حتى لا يكون كسلمان في أول قصته؟",
                 rawOptions: [
-                    "فتح المصحف بانتظام والتعرف على معاني الآيات العظيمة واستخراج كنوزها",
+                    "فتح المصحف بانتظام والتعرف على معاني الآيات العظيمة واستخرج كنوزها",
                     "الانتظار حتى يكبر في السن كلياً",
                     "عدم محاولة قراءة المصحف إطلاقاً"
                 ],
@@ -582,7 +563,6 @@
             }
         ];
 
-        /* GAME STATE VARIABLES */
         let preparedQuestions = [];
         let currentQuestionIndex = 0;
         let score = 0;
@@ -656,19 +636,16 @@
             });
         };
 
-        /* SHUFFLE OPTIONS FUNCTION TO ENSURE RANDOM ANSWER PLACEMENT */
         function prepareQuestionsData() {
             preparedQuestions = baseQuestions.map(q => {
                 const correctText = q.rawOptions[q.correctIndex];
                 
-                // Shuffle options array using Fisher-Yates
                 let shuffledOptions = [...q.rawOptions];
                 for (let i = shuffledOptions.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
                 }
 
-                // Find new correct index
                 const newCorrectIndex = shuffledOptions.indexOf(correctText);
 
                 return {
@@ -707,7 +684,6 @@
             document.getElementById('q-counter').textContent = `${index + 1}/${preparedQuestions.length}`;
             document.getElementById('char-name').textContent = q.charName;
             
-            // Set image path based on character name from local folder
             const charImgs = characterImagePathMap[q.charName] || { normal: `images/${q.charName}.jpg`, surprised: `images/${q.charName}.jpg` };
             const imgNormalEl = document.getElementById('char-img-normal');
             
@@ -719,7 +695,6 @@
 
             document.getElementById('question-text').textContent = q.question;
 
-            // Render Options
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
 
@@ -772,7 +747,6 @@
             } else {
                 playSound('wrong');
                 
-                // Set character image for wrong answer modal from local path
                 const charImgs = characterImagePathMap[q.charName] || { normal: `images/${q.charName}.jpg`, surprised: `images/${q.charName}.jpg` };
                 const imgWrongEl = document.getElementById('modal-wrong-img');
                 
@@ -803,7 +777,6 @@
             playSound('fanfare');
             triggerConfetti(250);
 
-            // Repeat confetti bursts for grand feel
             setTimeout(() => triggerConfetti(150), 600);
             setTimeout(() => triggerConfetti(150), 1200);
 
@@ -816,7 +789,6 @@
             initGame();
         }
 
-        /* MODAL HANDLERS */
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
             document.getElementById(id).classList.add('flex');
@@ -827,30 +799,6 @@
             document.getElementById(id).classList.add('hidden');
         }
 
-        function openImageUploader() {
-            const list = document.getElementById('upload-characters-list');
-            list.innerHTML = '';
-
-            const charNames = Object.keys(characterImagePathMap);
-            charNames.forEach(name => {
-                const item = document.createElement('div');
-                item.className = "p-3 bg-gray-50 rounded-2xl border border-gray-200 space-y-2";
-                
-                const charImgs = characterImagePathMap[name] || { normal: "", surprised: "" };
-                
-                item.innerHTML = `
-                    <div class="font-extrabold text-indigo-900 border-b pb-1 text-sm flex justify-between items-center">
-                        <span>البطل: ${name}</span>
-                        <span class="text-xs text-emerald-600 font-bold">مسار الصورة: ${charImgs.normal}</span>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-
-            openModal('modal-uploader');
-        }
-
-        /* CONFETTI CELEBRATION EFFECT ON ANSWERS & VICTORY */
         function triggerConfetti(count = 60) {
             const canvas = document.getElementById('confetti-canvas');
             const ctx = canvas.getContext('2d');

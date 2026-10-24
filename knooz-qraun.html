@@ -81,6 +81,39 @@
 
     <canvas id="confetti-canvas"></canvas>
 
+    <!-- Modal 0: Start Screen (Select Start Level) -->
+    <div id="modal-start-selection" class="fixed inset-0 bg-indigo-950/90 backdrop-blur-md flex justify-center items-center z-50 p-4">
+        <div class="bg-gradient-to-b from-indigo-900 via-purple-900 to-indigo-950 rounded-3xl p-6 md:p-8 max-w-lg w-full text-center shadow-2xl border-4 border-amber-400 relative overflow-hidden text-white pulse-gold">
+            <div class="w-24 h-24 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-xl floating">
+                <i class="fa-solid fa-compass text-indigo-950 text-5xl"></i>
+            </div>
+
+            <h2 class="text-3xl font-black text-amber-300 mb-2">أهلاً بك يا بطل القرآن! 🌟</h2>
+            <p class="text-indigo-100 font-bold text-sm md:text-base mb-6 leading-relaxed">
+                مرحباً بك في رحلة اكتشاف كنوز القرآن الكريم والأماني العظيمة! من أين تحب أن تبدأ رحلتك الشيقة اليوم؟
+            </p>
+
+            <div class="grid grid-cols-1 gap-4 mb-2">
+                <button onclick="selectStartingLevel(1)" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-indigo-950 font-black p-4 rounded-2xl shadow-xl transition-all transform active:scale-95 text-right flex items-center justify-between border-2 border-white/40">
+                    <div>
+                        <div class="text-base font-extrabold">المستوى الأول 📖</div>
+                        <div class="text-xs text-indigo-900 font-bold">مراجعة القصة العامة وتفاصيلها الدقيقة</div>
+                    </div>
+                    <i class="fa-solid fa-circle-play text-2xl"></i>
+                </button>
+
+                <button onclick="selectStartingLevel(2)" class="w-full bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white font-black p-4 rounded-2xl shadow-xl transition-all transform active:scale-95 text-right flex items-center justify-between border-2 border-white/40">
+                    <div>
+                        <div class="text-base font-extrabold">المستوى الثاني 👑</div>
+                        <div class="text-xs text-emerald-100 font-bold">19 أمنية للأبطال والمعلم أكمل والأدلة الشرعية</div>
+                    </div>
+                    <i class="fa-solid fa-crown text-2xl text-amber-300"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
     <header class="w-full bg-white/80 backdrop-blur-md shadow-lg p-4 sticky top-0 z-40 border-b-4 border-amber-400">
         <div class="max-w-4xl mx-auto flex justify-between items-center px-2">
             <div class="flex items-center space-x-3 space-x-reverse">
@@ -89,7 +122,7 @@
                 </div>
                 <div>
                     <h1 class="font-extrabold text-xl md:text-2xl text-indigo-900">رحلة اكتشاف كنوز القرآن</h1>
-                    <p class="text-xs md:text-sm text-indigo-600 font-bold">لعبة البطاقات التفاعلية للأبطال</p>
+                    <p id="level-title-tag" class="text-xs md:text-sm text-indigo-600 font-bold">المستوى الأول: مراجعة القصة العامة</p>
                 </div>
             </div>
 
@@ -97,7 +130,7 @@
                 <div class="bg-indigo-50 border-2 border-indigo-200 px-4 py-2 rounded-2xl flex items-center gap-2 shadow-inner">
                     <i class="fa-solid fa-star text-amber-400 text-xl animate-pulse"></i>
                     <span id="score" class="font-black text-xl text-indigo-800">0</span>
-                    <span class="text-xs text-indigo-400">/ 30</span>
+                    <span id="max-score-tag" class="text-xs text-indigo-400">/ 30</span>
                 </div>
             </div>
         </div>
@@ -111,8 +144,8 @@
     <main class="max-w-3xl mx-auto w-full px-4 py-6 flex-1 flex flex-col justify-center items-center relative">
 
         <!-- Question Card Box -->
-        <div class="w-full mb-6">
-            <div id="card-container" class="card-perspective w-full h-[460px] cursor-pointer">
+        <div class="w-full mb-4">
+            <div id="card-container" class="card-perspective w-full h-[520px] cursor-pointer">
                 <div id="card-inner" class="card-inner relative w-full h-full shadow-2xl rounded-3xl border-4 border-white/80">
                     
                     <!-- Card Front (Click to Reveal) -->
@@ -128,20 +161,20 @@
                             <i class="fa-solid fa-box-open"></i>
                         </div>
                         <h2 class="text-2xl font-black mb-1 text-amber-200">البطاقة رقم <span id="current-question-num">1</span></h2>
-                        <p class="text-indigo-100 text-sm">اكتشف السؤال واختبر معرفتك الكبيرة!</p>
+                        <p id="card-front-desc" class="text-indigo-100 text-sm">اكتشف السؤال واختبر معرفتك الكبيرة!</p>
                     </div>
 
                     <!-- Card Back (Question & Character Display) -->
                     <div class="card-back absolute w-full h-full bg-white rounded-3xl p-5 md:p-6 flex flex-col justify-between shadow-inner border-2 border-indigo-100 overflow-y-auto">
                         
                         <div class="flex items-center justify-between border-b border-indigo-100 pb-3">
-                            <!-- Character Badge with Real Image Avatar -->
+                            <!-- Character Badge with Image Avatar -->
                             <div class="flex items-center gap-3">
                                 <div id="char-avatar-box" class="w-16 h-16 rounded-2xl bg-amber-100 border-2 border-amber-300 flex items-center justify-center p-0.5 shadow-sm transform hover:scale-110 transition-transform overflow-hidden relative shrink-0">
                                     <img id="char-img-normal" src="" alt="صورة البطل" class="w-full h-full object-cover rounded-xl" onerror="this.onerror=null; this.src='https://placehold.co/150x150/fde047/1e1b4b?text=صورة+البطل';">
                                 </div>
                                 <div>
-                                    <span class="text-xs text-indigo-400 font-bold block">شخصية السؤال:</span>
+                                    <span id="char-label-tag" class="text-xs text-indigo-400 font-bold block">شخصية السؤال:</span>
                                     <span id="char-name" class="font-extrabold text-indigo-900 text-lg">سلمان</span>
                                 </div>
                             </div>
@@ -153,7 +186,7 @@
 
                         <!-- Question Content -->
                         <div class="my-3">
-                            <h3 id="question-text" class="text-lg md:text-xl font-black text-indigo-950 leading-relaxed">
+                            <h3 id="question-text" class="text-base md:text-lg font-black text-indigo-950 leading-relaxed">
                                 جارٍ تحميل السؤال...
                             </h3>
                         </div>
@@ -169,20 +202,57 @@
             </div>
         </div>
 
+        <!-- Navigation Bar (Previous & Next Buttons) -->
+        <div class="w-full flex items-center justify-between gap-4 px-2">
+            <button id="btn-prev-q" onclick="goToPrevQuestion()" class="flex-1 bg-white hover:bg-indigo-50 text-indigo-900 border-2 border-indigo-200 font-black py-3 px-4 rounded-2xl shadow-md transition-all transform active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none">
+                <i class="fa-solid fa-arrow-right"></i> السؤال السابق
+            </button>
+            <button id="btn-next-q" onclick="goToNextQuestion()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 px-4 rounded-2xl shadow-md transition-all transform active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none">
+                السؤال التالي <i class="fa-solid fa-arrow-left"></i>
+            </button>
+        </div>
+
     </main>
+
+    <!-- Banner Modal: Transition to Level 2 -->
+    <div id="modal-banner-level2" class="fixed inset-0 bg-indigo-950/85 backdrop-blur-md hidden justify-center items-center z-50 p-4">
+        <div class="bg-gradient-to-b from-indigo-900 via-purple-900 to-indigo-950 rounded-3xl p-6 md:p-8 max-w-lg w-full text-center shadow-2xl border-4 border-amber-400 relative overflow-hidden text-white pulse-gold">
+            <div class="w-24 h-24 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-xl floating">
+                <i class="fa-solid fa-crown text-indigo-950 text-5xl"></i>
+            </div>
+
+            <span class="bg-amber-400 text-indigo-950 text-xs font-black px-4 py-1.5 rounded-full inline-block mb-2 uppercase tracking-wider">مرحلة جديدة</span>
+            <h2 class="text-3xl font-black text-amber-300 mb-3">🔥 أهلاً بك في المستوى الثاني 🔥</h2>
+            
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 mb-6 border border-white/20 text-right space-y-2">
+                <h4 class="font-extrabold text-amber-300 text-center text-lg border-b border-white/10 pb-2">🎯 19 أمنية ومصدري القرآن والسنة</h4>
+                <p class="text-indigo-100 text-sm leading-relaxed">
+                    ✨ <strong>كيف نلعب هذا المستوى؟</strong>
+                </p>
+                <ul class="text-xs text-indigo-200 space-y-1.5 list-disc list-inside">
+                    <li>3 أمنيات لكل بطل (كامل، تامر، ريحان، حنظل) + 7 أمنيات للمعلم أكمل!</li>
+                    <li><strong>السؤال الأول:</strong> حدد هل حقق أمنيته من <span class="text-amber-300 font-bold">(القرآن)</span> أم <span class="text-amber-300 font-bold">(السنة)</span> أم <span class="text-amber-300 font-bold">(كلاهما)</span>؟</li>
+                    <li><strong>السؤال الثاني:</strong> نذكرك بالمنطوق الصحيح للأمنية لتختار الدليل المباشر!</li>
+                </ul>
+            </div>
+
+            <button onclick="startLevelTwo()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-indigo-950 font-black py-4 px-6 rounded-2xl shadow-xl transition-all transform active:scale-95 text-lg flex items-center justify-center gap-2">
+                الانطلاق للمستوى الثاني 🚀
+            </button>
+        </div>
+    </div>
 
     <!-- Wrong Answer Modal -->
     <div id="modal-wrong" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden justify-center items-center z-50 p-4">
         <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full text-center shadow-2xl border-4 border-rose-400 relative overflow-hidden transform transition-all">
-            <!-- Surprised Character Image Avatar -->
             <div class="w-28 h-28 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-3 border-4 border-rose-200 animate-bounce shadow-md p-1 overflow-hidden relative">
                 <img id="modal-wrong-img" src="" alt="صورة البطل مندهش" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://placehold.co/200x200/fca5a5/1e1b4b?text=صورة+مندهش'">
             </div>
             <h3 class="text-xl font-black text-rose-600 mb-1">
-                <span id="modal-wrong-char-name" class="text-indigo-950">سلمان</span> مندهش جداً!
+                <span id="modal-wrong-char-name" class="text-indigo-950">البطل</span> يقول لك:
             </h3>
-            <p id="modal-wrong-text" class="text-gray-600 font-bold text-sm mb-5 leading-relaxed">
-                البطل <span id="modal-wrong-char-inline" class="text-rose-600 font-extrabold">سلمان</span> متعجب من هذه الإجابة! فكّر جيداً معه وحاول مجدداً!
+            <p id="modal-wrong-text" class="text-gray-700 font-extrabold text-lg mb-5 leading-relaxed bg-rose-50 p-3 rounded-2xl border border-rose-200">
+                حاول مرة أخرى يا بطل! 🤔
             </p>
             
             <button onclick="closeModal('modal-wrong')" class="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 text-base">
@@ -201,25 +271,24 @@
                 <i class="fa-solid fa-trophy text-indigo-950 text-5xl"></i>
             </div>
 
-            <h2 class="text-3xl font-black text-amber-300 mb-2">🎉 مبروووووووك يا بطل! 🎉</h2>
-            <p class="text-indigo-200 font-bold text-lg mb-4">لقد أتممت رحلة اكتشاف كنوز القرآن الكريم بنجاح باهر ومراجعة شاملة كاملة!</p>
+            <h2 class="text-3xl font-black text-amber-300 mb-2">🎉 مبروووووووك يا بطل الكنوز! 🎉</h2>
+            <p class="text-indigo-200 font-bold text-lg mb-4">لقد أتممت جميع التحديات بنجاح باهر وميزت بين الأدلة الشرعية وربطتها بـ 19 أمنية مباركة للأبطال والمعلم أكمل!</p>
 
             <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-6 border border-white/20">
-                <p class="text-amber-200 font-extrabold text-sm mb-1">النتيجة النهائية:</p>
+                <p class="text-amber-200 font-extrabold text-sm mb-1">النتيجة النهائية للرحلة:</p>
                 <div class="text-4xl font-black text-white flex items-center justify-center gap-2">
-                    <span id="final-score">30</span> <span class="text-amber-400 text-2xl">/ 30</span> ⭐
+                    <span id="final-score">0</span> <span id="final-max-score" class="text-amber-400 text-2xl">⭐</span>
                 </div>
-                <p id="victory-badge-text" class="text-xs text-emerald-300 font-bold mt-2">✨ بطل محترف وحافظ متقن لكل كنوز القصة والقرآن! ✨</p>
+                <p class="text-xs text-emerald-300 font-bold mt-2">✨ بطل متوج وحافظ متقن لجميع الأدلة وأماني كتاب الله وسنة نبيه! ✨</p>
             </div>
 
             <button onclick="restartGameFromVictory()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-indigo-950 font-black py-4 px-6 rounded-2xl shadow-xl transition-all transform active:scale-95 text-lg flex items-center justify-center gap-2">
-                اللعب مرة أخرى 🚀
+                إعادة اللعبة من البداية 🚀
             </button>
         </div>
     </div>
 
     <script>
-        // Local relative file paths pointing to images inside the 'images' folder
         const characterImagePathMap = {
             "سلمان": { normal: "images/salman.jpg", surprised: "images/salman.jpg" },
             "كامل": { normal: "images/kamel.jpg", surprised: "images/kamel.jpg" },
@@ -229,345 +298,296 @@
             "المعلم أكمل": { normal: "images/akmal.jpg", surprised: "images/akmal.jpg" }
         };
 
-        /* GAME DATA DEFINITION - 30 FULL REVISION QUESTIONS */
-        const baseQuestions = [
+        /* LEVEL 1 DATA - CHRONOLOGICAL STORY ORDER WITH PRECISE SYMBOLISM */
+        const level1BaseQuestions = [
+            // --- STORY SEQUENCE & DEEP SYMBOLISM ---
+            { id: 1, charName: "سلمان", question: "في بداية القصة، ما الرحلة التي خرج فيها سلمان وما الذي حدث له عندما كان يحاول العودة؟", rawOptions: ["أراد سلمان الذهاب إلى مكان عمل والده في وسط الصحراء، لكنه ضل طريقه ولم يتمكن من الوصول", "خرج في رحلة للبحر وضاع في المركب", "كان يلعب في المدرسة وضاع في الفناء"], correctIndex: 0 },
+            { id: 2, charName: "سلمان", question: "عندما شعر سلمان بالتيه والظلام في الصحراء، ما الأمر الذي حاول القيام به أولاً للنجاة؟", rawOptions: ["حاول الاتصال بوالدته بالهاتف المحمول لطلب المساعدة لكنه وجد الهاتف خارج نطاق تغطية الشبكة", "جلس ويبكي دون محاولة التصرف", "ترك هاتفه ومشى في اتجاه مجهول"], correctIndex: 0 },
+            { id: 3, charName: "سلمان", question: "ما الذي لاحظه سلمان على منارة/مئذنة المسجد من بعيد وكيف ساعدته في ظلمات الصحراء؟", rawOptions: ["لاحظ نور المئذنة الساطع المضيء الذي أضاء له الظلام ووجهه نحو الطريق الآمن", "لاحظ صوت الجرس الشديد", "لم يرَ أي نور واعتمد على النجوم فقط"], correctIndex: 0 },
+            { id: 4, charName: "سلمان", question: "ما المعنى الشريف والمفهوم الدقيق الذي يمثله 'نور المئذنة' الذي أضاء لسلمان في ظلمات الصحراء؟", rawOptions: ["يشبه 'نور القرآن الكريم' الذي يضيء ظلمات الحيرة والجهل ويهدي التائهين في الحياة", "يشبه المصابيح الكهربائية العادية", "يشبه أضواء السيارات في الطريق"], correctIndex: 0 },
+            { id: 5, charName: "سلمان", question: "كيف فكر سلمان واستعمل عقله عندما عجز عن الاتصال بالشبكة وهداه الله للحل المباشر؟", rawOptions: ["أنه كان يعلم أن بيتهم يقع في اتجاه الشمال فكان يبحث عن بيتهم في اتجاه الشمال", "انتظر حتى تأتي سيارة لتنقذه", "أغلق الهاتف تماماً ونام مكانه"], correctIndex: 0 },
+            { id: 6, charName: "سلمان", question: "ماذا فعل سلمان عندما خيم عليه الظلام ولا يزال تائهاً في الصحراء؟", rawOptions: ["تمنى أن يكون معه مصباح أو كشاف", "اتبع أثر أقدامه القديمة في الرمال فقط", "مشى عكس اتجاه الرياح دون حكمة"], correctIndex: 0 },
+            { id: 7, charName: "سلمان", question: "في التشبيه العميق والدقيق للقصة، من هي الشخصية الشريفة التي تشبهها 'الأُم' في رفقها وهدايتها ورعايتها؟", rawOptions: ["تشبه 'الرسول ﷺ' في نصحه ورحمته ورعايته وأخذه بيد أمته إلى النور والخير", "تشبه القائد الميداني في المعركة", "تشبه صديق الدراسة في الصف"], correctIndex: 0 },
+            { id: 8, charName: "سلمان", question: "كيف استقبلت الأم سلمان عند وصوله، وماذا أدرك سلمان بشأن الهواتف الذكية والقرآن الكريم؟", rawOptions: ["استقبلته بالترفق والاحتضان، وأدرك سلمان أنه كان يملك أدوات نجاة في هاتفه غفل عنها كما يغفل الناس عن كنوز القرآن", "استقبلته بالعتاب الشديد والتوبيخ", "تجاهلت ما حدث معه تماماً"], correctIndex: 0 },
+            { id: 9, charName: "المعلم أكمل", question: "كيف عقد 'المعلم أكمل' الرابط الدقيق بين تجربة سلمان مع تطبيقات الهاتف وبين القرآن الكريم؟", rawOptions: ["وضح أن القرآن مليء بالكنوز الهادية والحلول النافعة التي تشفي وتعين الإنسان إذا تدبر آياته وعمل بها", "قال إن الهواتف أهم من الكتب", "طلب منهم ترك الهواتف وعدم التفكير فيها"], correctIndex: 0 },
+            { id: 10, charName: "المعلم أكمل", question: "ما معنى وصف النبي والقرآن بالهداية ورفع الهمم بحسب شرح المعلم أكمل؟", rawOptions: ["أن التمسك بهداية الرسول والقرآن يبعث الحياة والهمة والعزيمة ويمحو الشقاء", "أن الهداية تكون بالقراءة السريعة فقط", "أن الحفظ بدون فهم يفي بالغرض"], correctIndex: 0 },
+            { id: 11, charName: "كامل", question: "ما الوصف الشريف الذي أطلقه الطلاب على 'المعلم أكمل' لما يغرس فيهم من العلم والتربية؟", rawOptions: ["وصفوه بأنه من 'الربانيين' الذين يعلمون الناس صغار العلم قبل كباره بترفق وحكمة", "وصفوه بأنه القارئ السريع", "وصفوه بأنه الأستاذ الصارم"], correctIndex: 0 },
+            { id: 12, charName: "كامل", question: "ماذا تمنى كامل لوالديه يوم القيامة؟", rawOptions: ["أن يُكسى والداه حلتين لا تقوم لهما الدنيا ببركة حفظه وعمله بالقرآن", "أن يشتري لوالديه سيارة فاخرة", "أن يحصل على شهادة تكريم دنيوية"], correctIndex: 0 },
+            { id: 13, charName: "تامر", question: "ما الأثر العظيم والوعد الإلهي الذي استشهد به تامر لمن اتبع هدى الله وقرآنه؟", rawOptions: ["أنه لا يضل في الدنيا ولا يشقى في الآخرة كما في الآية: (فَمَنِ اتَّبَعَ هُدَايَ فَلَا يَضِلُّ وَلَا يَشْقَى)", "أنه ينجح في الاختبارات دون دراسة", "أنه يصبح غنياً بالمال فقط"], correctIndex: 0 },
+            { id: 14, charName: "تامر", question: "كيف يخرج القرآن الكريم العبد من ظلمات الصفات السيئة إلى نور الأخلاق العالية؟", rawOptions: ["بأن يزكي نفسه بآيات الكتاب كما في قوله تعالى: (لِتُخْرِجَ النَّاسَ مِنَ الظُّلُمَاتِ إِلَى النُّورِ)", "بالابتعاد عن الناس وعدم الحديث معهم", "بالتظاهر بالأخلاق فقط"], correctIndex: 0 },
+            { id: 15, charName: "ريحان", question: "ما المعنى الدقيق لمصطلح 'تثوير القرآن' الذي ذكره ريحان عن ابن مسعود رضي الله عنه؟", rawOptions: ["البحث العميق والتفكر في آيات القرآن لاستخراج علومه وأسراره وهداياته المباركة", "قراءة القرآن بصوت مرتفع جداً", "تقليب صفحات المصحف بسرعة"], correctIndex: 0 },
+
+            // --- PART 2: FINE DETAILS & HEROES' END-STORY FEELINGS ---
+            { id: 16, charName: "ريحان", question: "ما الفرق الدقيق الذي وضحه ريحان بين كلمتي 'العلاج' و'الشفاء' في القرآن؟", rawOptions: ["العلاج قد يحقق الشفاء وقد لا يحقق الشفاء، أما القرآن فهو يشفي شفاءً كاملاً للروح والأبدان", "الشفاء يكون بالأدوية فقط والعلاج بالدعاء", "لا يوجد أي فرق بين الكلمتين"], correctIndex: 0 },
+            { id: 17, charName: "حنظل", question: "ما العلاج القرآني الذي ذكره حنظل للتخلص من مشاعر القلق والخوف والشعور بالضيق؟", rawOptions: ["ذكر الله والتعلق بآياته كما قال تعالى: (أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ)", "النوم لفترات طويلة جداً", "الانشغال بالألعاب الإلكترونية"], correctIndex: 0 },
+            { id: 18, charName: "كامل", question: "بعد رحلة اكتشاف خيرات وبركات القرآن، بماذا شعر كامل عندما سأله المعلم أكمل عن إحساسه؟", rawOptions: ["شعر بأنه قد ازداد حباً للقرآن وإقبالاً عليه وإدراكاً لأهميته", "شعر بالتعب ورغب في إنهاء الرحلة", "شعر بالخوف من حفظ السور الطويلة"], correctIndex: 0 },
+            { id: 19, charName: "تامر", question: "بماذا شعر تامر بعد الرحلة الشيقة عندما طلب منه المعلم أكمل التعبير عن شعوره؟", rawOptions: ["شعر بالحياء من الله", "شعر بالحزن والرغبة في النوم", "شعر بأنه أفضل من أصدقائه"], correctIndex: 0 },
+            { id: 20, charName: "المعلم أكمل", question: "بماذا أوصانا النبي أن ندعو الله إذا أصابنا هم أو حزن؟", rawOptions: ["أن يجعله الله ربيع قلوبنا، ونور صدورنا، وجلاء أحزاننا، وذهاب همومنا", "أن يجعله كتاباً نقرؤه في المناسبات فقط", "أن يجعله حفظاً للأرقام والتواريخ"], correctIndex: 0 },
+            { id: 21, charName: "ريحان", question: "بماذا شعر ريحان في نهاية الرحلة بعدما استمع إلى هدايات القرآن الكريم؟", rawOptions: ["شعر بالندم على أنه كان يبحث عن الأشياء الجميلة بعيداً عن القرآن", "شعر بالرغبة في الانتقال لمدرسة أخرى", "شعر بأنه لم يستفد شيئاً من الدرس"], correctIndex: 0 },
+            { id: 22, charName: "حنظل", question: "بماذا شعر حنظل عندما سأله المعلم أكمل عن شعوره وإحساسه بعد الرحلة؟", rawOptions: ["شعر بالفرحة لأنه اكتشف أن القرآن سيكون طريقاً لحل كل مشكلاته وتحقيق كل أمنياته", "شعر بالقلق والتردد من قراءة المصحف", "شعر بالخوف من صعوبة الأسئلة"], correctIndex: 0 },
+            { id: 23, charName: "كامل", question: "بماذا شبه النبي ﷺ المؤمن الذي يقرأ القرآن الكريم ويعمل به في الحديث الشريف؟", rawOptions: ["بالأُتْرُجَّةِ، طعمها طيب وريحها طيب", "بالتمرة طعمها حلو ولا ريح لها", "بالريحانة ريحها طيب وطعمها مر"], correctIndex: 0 },
+            { id: 24, charName: "المعلم أكمل", question: "ما المعنى الشريف لقوله تعالى: (لَقَدْ أَنزَلْنَا إِلَيْكُمْ كِتَابًا فِيهِ ذِكْرُكُمْ) الذي وضحه المعلم أكمل؟", rawOptions: ["فيه شرفكم ورفعتكم وعزكم وصيتكم الجميل بين الأمم إذا تمسكتم به", "فيه أسماؤكم الشخصية مكتوبة", "فيه أرقامكم وحساباتكم"], correctIndex: 0 },
+            { id: 25, charName: "المعلم أكمل", question: "ما الآية الكريمة التي استدل بها المعلم أكمل على الاستقامة الكاملة في الأفكار والأعمال؟", rawOptions: ["قوله تعالى: (إِنْ هُوَ إِلَّا ذِكْرٌ لِّلْعَالَمِينَ * لِمَن شَاءَ مِنكُمْ أَن يَسْتَقِيمَ)", "قوله تعالى: (اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ)", "قوله تعالى: (إِنَّا أَنزَلْنَاهُ فِي لَيْلَةِ الْقَدْرِ)"], correctIndex: 0 },
+            { id: 26, charName: "المعلم أكمل", question: "ما الآية التي استدل بها المعلم أكمل على أن القرآن مصدر البركة والنماء للعبد؟", rawOptions: ["قوله تعالى: (وَهَٰذَا كِتَابٌ أَنزَلْنَاهُ مُبَارَكٌ فَاتَّبِعُوهُ وَاتَّقُوا لَعَلَّكُمْ تُرْحَمُونَ)", "قوله تعالى: (قُلْ يَا أَيُّهَا الْكَافِرُونَ)", "قوله تعالى: (إِذَا زُلْزِلَتِ الْأَرْضُ زِلْزَالَهَا)"], correctIndex: 0 },
+            { id: 27, charName: "سلمان", question: "كيف ظهر إصرار سلمان بعد فهمه للدرس والتجربة التي مر بها في الصحراء؟", rawOptions: ["عزم على استكشاف كل الميزات والكنوز النافعة في القرآن وحياته وعدم الغفلة عنها أبداً", "قرر عدم الخروج لأي رحلة في المستقبل", "ترك استخدام الهواتف نهائياً"], correctIndex: 0 },
+            { id: 28, charName: "المعلم أكمل", question: "ما الآية الكريمة الدالة على أن رحمة الله المغنية خير مما يجمعه الناس في هذه الدنيا؟", rawOptions: ["قوله تعالى: (وَرَحْمَتُ رَبِّكَ خَيْرٌ مِّمَّا يَجْمَعُونَ)", "قوله تعالى: (مالِكِ يَوْمِ الدِّينِ)", "قوله تعالى: (إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ)"], correctIndex: 0 },
+            { id: 29, charName: "كامل", question: "من هم 'أهل الله وخاصته' كما ورد في الحديث الشريف الذي ذكره كامل؟", rawOptions: ["هم أهل القرآن الذين يقرؤونه ويتدبرونه ويعملون به في حياتهم", "هم الذين يسكنون في القراء القريبة من المساجد فقط", "هم الذين يكتفون بحفظ الحروف دون عمل"], correctIndex: 0 },
+            { id: 30, charName: "المعلم أكمل", question: "ما الشعار والعهد الختامي الذي اتفق عليه المعلم أكمل وأبطاله جميعاً؟", rawOptions: ["القرآن نورنا وكنزنا وعزنا، ونحن أبطاله الحافظون العاملون به دائماً!", "القرآن نقرؤه فقط في رمضان", "الهواتف الذكية هي أصل النجاح"], correctIndex: 0 }
+        ];
+
+        /* LEVEL 2 DATA DEFINITION - 19 TOTAL WISHES */
+        const level2BaseData = [
+            // KAMEL (3 WISHES)
             {
-                id: 1,
-                charName: "سلمان",
-                question: "عندما ضل سلمان طريقه في الصحراء وحاول الاتصال بوالدته، لماذا لم يلتقط هاتفه أي شبكة؟",
-                rawOptions: [
-                    "لأن الهاتف كان مغلقاً تماماً",
-                    "لأن الهاتف كان خارج تغطية الشبكة في الصحراء",
-                    "لأن بطارية الهاتف نفدت بالكامل"
+                hero: "كامل",
+                wishNumStr: "الأولى",
+                wishContent: "أتمنى أن أكون من أقرب الناس إلى الله",
+                sourceCorrectIndex: 1, // السنة
+                evidenceOptions: [
+                    "حديث النبي ﷺ: (إن لله أهليين من الناس.. هم أهل القرآن أهل الله وخاصته)",
+                    "قوله تعالى: (واعتصموا بحبل الله جميعا ولا تفرقوا)",
+                    "قوله تعالى: (قل هو الله أحد الله الصمد)"
                 ],
-                correctIndex: 1
+                evidenceCorrectIndex: 0
             },
             {
-                id: 2,
-                charName: "سلمان",
-                question: "عندما كان سلمان تائهاً في الظلام ومعه هاتفه، تمنى وجود أداة لمعرفة اتجاه الشمال وأداة للإنارة، فما هما اللتان اكتشف وجودهما لاحقاً؟",
-                rawOptions: [
-                    "لعبة إلكترونية وراديو",
-                    "البوصلة والتطبيق المضيء (الكشاف)",
-                    "طعام وشراب وخريطة ورقية"
+                hero: "كامل",
+                wishNumStr: "الثانية",
+                wishContent: "أتمنى أن أكون مع أبي وأمي في أعلى درجات الجنة (الفردوس الأعلى)",
+                sourceCorrectIndex: 1, // السنة
+                evidenceOptions: [
+                    "قوله تعالى: (وبالوالدين إحسانا)",
+                    "حديث النبي ﷺ: (يجيء صاحب القرآن.. ويكسى والداه حلتين لا تقوم لهما الدنيا.. فيقال بأخذ ولدكما القرآن)",
+                    "حديث النبي ﷺ: (خيركم من تعلم القرآن وعلمه)"
                 ],
-                correctIndex: 1
+                evidenceCorrectIndex: 1
             },
             {
-                id: 3,
-                charName: "المعلم أكمل",
-                question: "ما العبرة التي نتعلمها من قصة سلمان وهاتفه الذكي الذي كان يحوي البوصلة والكشاف دون أن يدري؟",
-                rawOptions: [
-                    "ألا نستخدم الهواتف المحمولة في السفر",
-                    "ألا نغفل عن استكشاف الكنوز والفوائد النافعة القريبة منا (كالقرآن والهاتف) قبل فوات الأوان",
-                    "أن نسافر دائماً بمفردنا في الصحراء"
+                hero: "كامل",
+                wishNumStr: "الثالثة",
+                wishContent: "أتمنى أن أكون متميزًا ومتفوقًا ومن أفضل الناس",
+                sourceCorrectIndex: 1, // السنة
+                evidenceOptions: [
+                    "قوله تعالى: (يرفع الله الذين آمنوا منكم والذين أوتوا العلم درجات)",
+                    "حديث النبي ﷺ: (خيركم من تعلم القرآن وعلمه)",
+                    "قوله تعالى: (واعبد ربك حتى يأتيك اليقين)"
                 ],
-                correctIndex: 1
+                evidenceCorrectIndex: 1
+            },
+
+            // TAMER (3 WISHES)
+            {
+                hero: "تامر",
+                wishNumStr: "الأولى",
+                wishContent: "أن أكون سعيدًا",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (فمن اتبع هداي فلا يضل ولا يشقى)",
+                    "قوله تعالى: (إنا أعطيناك الكوثر)",
+                    "حديث النبي ﷺ: (الدين النصيحة)"
+                ],
+                evidenceCorrectIndex: 0
             },
             {
-                id: 4,
-                charName: "كامل",
-                question: "بماذا شبّه 'كامل' الهاتف المحمول في القصة كلاً من (سلمان، والهاتف المحمول، والأُم)؟",
-                rawOptions: [
-                    "سلمان يشبه المعلم، والهاتف يشبه الكتاب، والأم تشبه المدرسة",
-                    "سلمان يشبهنا نحن، والهاتف المحمول يشبه القرآن، والأُم تشبه المعلم والربانيين",
-                    "الصحراء تشبه المدينة، والهاتف يشبه التلفاز"
+                hero: "تامر",
+                wishNumStr: "الثانية",
+                wishContent: "أن أعرف الصواب وأهتدي إليه دائمًا؛ فكثيرًا ما كنت أفعل أشياء وأعتقد أنها الصواب ولا تكون كذلك",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (إِنَّ هَذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ)",
+                    "قوله تعالى: (والعصر إن الإنسان لفي خسر)",
+                    "حديث النبي ﷺ: (لا تغضب ولك الجنة)"
                 ],
-                correctIndex: 1
+                evidenceCorrectIndex: 0
             },
             {
-                id: 5,
-                charName: "ريحان",
-                question: "ما معنى كلمة 'تثوير القرآن' كما ذكر الصحابي الجليل عبد الله بن مسعود رضي الله عنه؟",
-                rawOptions: [
-                    "حفظ آيات القرآن فقط دون فهمها",
-                    "البحث في القرآن وعَنْهُ وحولَهُ لأجل اكتشاف كنوزه وما فيه من خير",
-                    "وضع المصحف في مكتبة فاخرة دون قراءة"
+                hero: "تامر",
+                wishNumStr: "الثالثة",
+                wishContent: "أن أتخلص من كل صفاتي السيئة التي تغضب الله وتتسبب في أن يغضب مني والدي والناس من حولي",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (كِتَابٌ أَنزَلْنَاهُ إِلَيْكَ لِتُخْرِجَ النَّاسَ مِنَ الظُّلُمَاتِ إِلَى النُّورِ)",
+                    "حديث النبي ﷺ: (إنما الأعمال بالنيات)",
+                    "قوله تعالى: (قل أعوذ برب الفلق)"
                 ],
-                correctIndex: 1
+                evidenceCorrectIndex: 0
+            },
+
+            // REIHAN (3 WISHES)
+            {
+                hero: "ريحان",
+                wishNumStr: "الأولى",
+                wishContent: "أتمنى أن يزيد إيماني؛ لأن الإيمان هو الذي يدفع لكل خير",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (وَإِذَا تُلِيَتْ عَلَيْهِمْ آيَاتُهُ زَادَتْهُمْ إِيمَانًا)",
+                    "قوله تعالى: (إذا جاء نصر الله والفتح)",
+                    "حديث النبي ﷺ: (طهور شطر الإيمان)"
+                ],
+                evidenceCorrectIndex: 0
             },
             {
-                id: 6,
-                charName: "كامل",
-                question: "من أمنيات 'كامل' أن يكون من أقرب الناس إلى الله، فكيف يحقق القرآن الكريم ذلك؟",
-                rawOptions: [
-                    "بأن يكون من 'أهل القرآن' الذين هم أهل الله وخاصته",
-                    "بأن يجمع الأموال الكثيرة في الدنيا",
-                    "بأن ينام طوال النهار والليل"
+                hero: "ريحان",
+                wishNumStr: "الثانية",
+                wishContent: "أتمنى أن أتغير للأفضل وينصلح حالي",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (يَتْلُوا عَلَيْهِمْ آيَاتِهِ وَيُزَكِّيهِمْ وَيُعَلِّمُهُمُ الْكِتَابَ وَالْحِكْمَةَ)",
+                    "حديث النبي ﷺ: (الكلمة الطيبة صدقة)",
+                    "قوله تعالى: (تبت يدا أبي لهب وتب)"
                 ],
-                correctIndex: 0
+                evidenceCorrectIndex: 0
             },
             {
-                id: 7,
-                charName: "كامل",
-                question: "كيف يُكرم القرآن والدا حافظ القرآن الكريم يوم القيامة؟",
-                rawOptions: [
-                    "يُعطيان سيارة فخمة في الدنيا",
-                    "يُكسى والداه حلتين لا تقوم لهما الدنيا، ويقال لهما بأخذ ولدكما القرآن",
-                    "يُمنحان قصراً كبيراً بناءً على أثاثه"
+                hero: "ريحان",
+                wishNumStr: "الثالثة",
+                wishContent: "أتمنى أن يكون عندي رصيد كبير من الأجر والحسنات",
+                sourceCorrectIndex: 1, // السنة
+                evidenceOptions: [
+                    "قوله تعالى: (مالك يوم الدين)",
+                    "حديث النبي ﷺ: (أفلا يغدو أحدكم إلى المسجد فيتعلم آيتين من كتاب الله خير له من ناقتين كوماوين..)",
+                    "قوله تعالى: (الله لا إله إلا هو الحي القيوم)"
                 ],
-                correctIndex: 1
+                evidenceCorrectIndex: 1
+            },
+
+            // HANZAL (3 WISHES)
+            {
+                hero: "حنظل",
+                wishNumStr: "الأولى",
+                wishContent: "أتمنى أن تكون إرادتي قوية وهمتي كبيرة؛ فهناك كثيرًا من الأشياء أعرف أنها خطأ لكنني للأسف أقع فيها بسبب ضعف عزيمتي",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (وَكَذَلِكَ أَوْحَيْنَا إِلَيْكَ رُوحًا مِنْ أَمْرِنَا) وقوله: (اسْتَجِيبُوا لِلَّهِ وَلِلرَّسُولِ إِذَا دَعَاكُمْ لِمَا يُحْيِيكُمْ)",
+                    "حديث النبي ﷺ: (المرء مع من أحب)",
+                    "قوله تعالى: (قل يا أيها الكافرون)"
+                ],
+                evidenceCorrectIndex: 0
             },
             {
-                id: 8,
-                charName: "تامر",
-                question: "تمنى 'تامر' أن يكون سعيداً وأن يعرف الصواب دائماً، أين وجد طريق ذلك في القرآن؟",
-                rawOptions: [
-                    "في قصص الأمم السابقة فقط",
-                    "في قوله تعالى: (فمن اتبع هداي فلا يضل ولا يشقى)",
-                    "في عدد صفحات المصحف"
+                hero: "حنظل",
+                wishNumStr: "الثانية",
+                wishContent: "أتمنى أن أشعر بالاطمئنان والأمان؛ لأنني دائمًا أشعر بالقلق والخوف",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ) وقوله: (فَمَن تَبِعَ هُدَايَ فَلَا خَوْفٌ عَلَيْهِمْ وَلَا هُمْ يَحْزَنُونَ)",
+                    "حديث النبي ﷺ: (صوموا تصحوا)",
+                    "قوله تعالى: (إِنَّا أَنزَلْنَاهُ فِي لَيْلَةِ الْقَدْرِ)"
                 ],
-                correctIndex: 1
+                evidenceCorrectIndex: 0
             },
             {
-                id: 9,
-                charName: "ريحان",
-                question: "تمنى 'ريحان' أن يزيد إيمانه ويتغير للأفضل، كيف يصنع القرآن ذلك بالنفوس؟",
-                rawOptions: [
-                    "يزكي النفوس أي يطهرها ويطورها للأفضل",
-                    "يمنع الإنسان من القراءة تماماً",
-                    "يعلمنا لغات أجنبية مختلفة فقط"
+                hero: "حنظل",
+                wishNumStr: "الثالثة",
+                wishContent: "أتمنى أن أكون متفائلًا ومقبلًا على الحياة؛ لأنني دائمًا أشعر باليأس والإحباط",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: وصف القرآن بأنه (بُشْرَى لِلْمُسْلِمِينَ) و(بُشْرَى لِلْمُؤْمِنِينَ)",
+                    "حديث النبي ﷺ: (تهادوا تحابوا)",
+                    "قوله تعالى: (إِذَا زُلْزِلَتِ الْأَرْضُ زِلْزَالَهَا)"
                 ],
-                correctIndex: 0
+                evidenceCorrectIndex: 0
+            },
+
+            // TEACHER AKMAL (7 COMPLETE WISHES)
+            {
+                hero: "المعلم أكمل",
+                wishNumStr: "الأولى",
+                wishContent: "أن يرتفع شأني وأترقى في مراتب الخير في الدنيا والآخرة",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (لَقَدْ أَنزَلْنَا إِلَيْكُمْ كِتَابًا فِيهِ ذِكْرُكُمْ أَفَلَا تَعْقِلُونَ) وقوله: (وَإِنَّهُ لَذِكْرٌ لَّكَ وَلِقَوْمِكَ)",
+                    "حديث النبي ﷺ: (المرء على دين خليله)",
+                    "قوله تعالى: (قل أعوذ برب الناس)"
+                ],
+                evidenceCorrectIndex: 0
             },
             {
-                id: 10,
-                charName: "حنظل",
-                question: "لماذا وصف الله تعالى القرآن بأنه (روح) عندما تمنى حنظل إرادة وقوة همة؟",
-                rawOptions: [
-                    "لأنه يكتب بخط جميل جداً",
-                    "لأن القرآن للقلب كالروح للجسد يمثل الحياة ويرفع الهمة والعزيمة",
-                    "لأنه يقرأ بصوت مرتفع فقط"
+                hero: "المعلم أكمل",
+                wishNumStr: "الثانية",
+                wishContent: "أن تنجلي أحزاني وتذهب همومي سريعاً لكي لا تعكر علي صفو حياتي",
+                sourceCorrectIndex: 1, // السنة النبوية
+                evidenceOptions: [
+                    "حديث النبي ﷺ: (ما أصاب أحداً قط هم ولا حزن فقال: اللهم إني عبدك وابن عبدك... إلا أذهب الله همه وأبدله مكان حزنه فرجاً)",
+                    "قوله تعالى: (اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ)",
+                    "حديث النبي ﷺ: (طهور شطر الإيمان)"
                 ],
-                correctIndex: 1
+                evidenceCorrectIndex: 0
             },
             {
-                id: 11,
-                charName: "حنظل",
-                question: "عندما تمنى حنظل الطمأنينة والأمان والتخلص من القلق، ما الآية التي وجدها؟",
-                rawOptions: [
-                    "قوله تعالى: (ألا بذكر الله تطمئن القلوب)",
-                    "قوله تعالى: (اقرأ باسم ربك الذي خلق)",
+                hero: "المعلم أكمل",
+                wishNumStr: "الثالثة",
+                wishContent: "أن يشفيني الله ويعافيني من كل الأمراض والأضرار القلبية والنفسية والبدنية",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (وَنُنَزِّلُ مِنَ الْقُرْآنِ مَا هُوَ شِفَاءٌ وَرَحْمَةٌ لِّلْمُؤْمِنِينَ) وقوله: (وَشِفَاءٌ لِّمَا فِي الصُّدُورِ)",
+                    "حديث النبي ﷺ: (الكلمة الطيبة صدقة)",
+                    "قوله تعالى: (إذا جاء نصر الله والفتح)"
+                ],
+                evidenceCorrectIndex: 0
+            },
+            {
+                hero: "المعلم أكمل",
+                wishNumStr: "الرابعة",
+                wishContent: "أن تكون أفكاري وأقوالي وأعمالي وأحوالي مستقيمة وأكمل ما تكون",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (إِنْ هُوَ إِلَّا ذِكْرٌ لِّلْعَالَمِينَ * لِمَن شَاءَ مِنكُمْ أَن يَسْتَقِيمَ)",
+                    "حديث النبي ﷺ: (تهادوا تحابوا)",
+                    "قوله تعالى: (قل هو الله أحد)"
+                ],
+                evidenceCorrectIndex: 0
+            },
+            {
+                hero: "المعلم أكمل",
+                wishNumStr: "الخامسة",
+                wishContent: "أتمنى أن أكون من الربانيين",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (وَلَٰكِن كُونُوا رَبَّانِيِّينَ بِمَا كُنتُمْ تُعَلِّمُونَ الْكِتَابَ وَبِمَا كُنتُمْ تَدْرُسُونَ)",
+                    "حديث النبي ﷺ: (خيركم من تعلم القرآن وعلمه)",
                     "قوله تعالى: (إنا أعطيناك الكوثر)"
                 ],
-                correctIndex: 0
+                evidenceCorrectIndex: 0
             },
             {
-                id: 12,
-                charName: "المعلم أكمل",
-                question: "ما معنى 'الذكر' في قول الله تعالى: (لقد أنزلنا إليكم كتاباً فيه ذكركم)؟",
-                rawOptions: [
-                    "حفظ الأعداد والأرقام الرياضية",
-                    "الشرف والرفعة والكرامة في العناية بالقرآن",
-                    "كثرة الكلام الحديث مع الناس"
+                hero: "المعلم أكمل",
+                wishNumStr: "السادسة",
+                wishContent: "أتمنى أن يبارك الله لي في كل شيء فيثبت وينمو",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (وَهَٰذَا كِتَابٌ أَنزَلْنَاهُ مُبَارَكٌ فَاتَّبِعُوهُ وَاتَّقُوا لَعَلَّكُمْ تُرْحَمُونَ)",
+                    "حديث النبي ﷺ: (إنما الأعمال بالنيات)",
+                    "قوله تعالى: (والعصر إن الإنسان لفي خسر)"
                 ],
-                correctIndex: 1
+                evidenceCorrectIndex: 0
             },
             {
-                id: 13,
-                charName: "تامر",
-                question: "في دعاء النبي ﷺ لذهاب الهم والحزن، ماذا نطلب أن يجعل الله القرآن الكريم لنا؟",
-                rawOptions: [
-                    "مصباحاً في ظلام الليل فقط",
-                    "ربيع قلبي، ونور صدري، وجلاء حُزني، وذهاب همي",
-                    "سبباً لجمع الأموال والمتاع"
+                hero: "المعلم أكمل",
+                wishNumStr: "السابعة",
+                wishContent: "أتمنى أن أكون مغموراً برحمة الله في كل شيء",
+                sourceCorrectIndex: 0, // القرآن
+                evidenceOptions: [
+                    "قوله تعالى: (وَرَحْمَتُ رَبِّكَ خَيْرٌ مِّمَّا يَجْمَعُونَ)",
+                    "حديث النبي ﷺ: (المرء مع من أحب)",
+                    "قوله تعالى: (إذا زلزلت الأرض زلزالها)"
                 ],
-                correctIndex: 1
-            },
-            {
-                id: 14,
-                charName: "ريحان",
-                question: "ما الفرق بين 'العلاج' و'الشفاء' كما تعلم ريحان من وصف القرآن بأنه شفاء؟",
-                rawOptions: [
-                    "لا يوجد أي فرق بينهما مطلقاً",
-                    "العلاج قد يشفي وقد لا يشفي، أما الشفاء فهو تمام العافية وزوال المرض بالكلية",
-                    "الشفاء يكون بالأدوية فقط"
-                ],
-                correctIndex: 1
-            },
-            {
-                id: 15,
-                charName: "كامل",
-                question: "من هم 'الربانيون' كما ورد في القرآن الكريم؟",
-                rawOptions: [
-                    "الذين يبنون البيوت الكبيرة في الصحراء",
-                    "الذين اجتهدوا في التعلم والعمل بما تعلموه وتعليمه لغيرهم",
-                    "الذين يحفظون أسماء البلدان وحدها"
-                ],
-                correctIndex: 1
-            },
-            {
-                id: 16,
-                charName: "سلمان",
-                question: "كيف كان موقف سلمان بعد أن أدرك أن كشاف وبوصلة الهاتف كانا معه طوال الوقت دون علمه؟",
-                rawOptions: [
-                    "شعر بالندم الشديد والتأسف لأنه لم يستكشف إمكانيات هاتفه القريب منه سابقاً",
-                    "فرح لأنه لم يتصل بأحد",
-                    "قرر أن يترك هاتفه في الصحراء"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 17,
-                charName: "المعلم أكمل",
-                question: "ما الشبه بين من يملك مصحفاً دون تدبره وبين من يملك هاتفاً ذكياً تائهاً في الصحراء؟",
-                rawOptions: [
-                    "كلاهما يملك أداة نجاة عظيمة ولكنه يحرم نفسه من الفائدة لعدم الاستكشاف والعمل بها",
-                    "لا يوجد أي تشابه بينهما",
-                    "كلاهما لا يحتاج إلى القراءة إطلاقاً"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 18,
-                charName: "تامر",
-                question: "كيف يبعث القرآن الكريم النور في حياة المسلم كما تمنى تامر؟",
-                rawOptions: [
-                    "ينير عقله وقلبه بالحق، ويدد ظلمات الحيرة والشك والجهل",
-                    "يجعل عينيه تضيء باللون الأزرق",
-                    "يعطيه مصباحاً يدوياً كبيراً"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 19,
-                charName: "ريحان",
-                question: "ما الأثر الجميل الذي يتركه تدبر آيات القرآن في سلوك الطفل وأخلاقه؟",
-                rawOptions: [
-                    "يصبح أكثر برّاً بوالديه وأحسن خلقاً وأعلى همة وأ طيب لساناً",
-                    "يصبح يحب العزلة ولا يتحدث مع أحد",
-                    "يجعله ينقاد وراء كل ما يسمعه دون تفكير"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 20,
-                charName: "حنظل",
-                question: "ماذا يقصد بالهداية في قول الله تعالى: (إن هذا القرآن يهدي للتي هي أقوم)؟",
-                rawOptions: [
-                    "المرور من الطرقات الضيقة فقط",
-                    "الإرشاد لأصحّ وأفضل وأعدل الطرق والأخلاق والأعمال في كل أمور الحياة",
-                    "معرفة الطريق إلى السوق فقط"
-                ],
-                correctIndex: 1
-            },
-            {
-                id: 21,
-                charName: "المعلم أكمل",
-                question: "ما الواجب على من يستمع لقصة سلمان وأصدقائه تجاه المصحف الشريف؟",
-                rawOptions: [
-                    "أن يجعل للقرآن وقتاً يومياً للتدبر والحفظ والتعلم والعمل بآياته",
-                    "أن يكتفي بوضعه على الرف زينة للمنزل",
-                    "أن يقرأه مرة واحدة في السنة فقط"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 22,
-                charName: "كامل",
-                question: "لماذا وصف النبي ﷺ حافظ القرآن الكريم وقارئه بالـ (أترجة)؟",
-                rawOptions: [
-                    "لأن طعمها طيب وريحها طيب، يجمع بين القراءة والإيمان والأخلاق",
-                    "لأنها ثمرة صلبة جداً",
-                    "لأنها تنمو في الصحراء فقط"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 23,
-                charName: "سلمان",
-                question: "ما هي الأداة التي تستخرج بها الكنوز من القرآن الكريم كما استخرج سلمان البوصلة من هاتفه؟",
-                rawOptions: [
-                    "التفكر والتدبر وسؤال أهل العلم والعمل بالآيات",
-                    "القراءة السريعة دون فهم",
-                    "إغلاق المصحف دائماً"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 24,
-                charName: "تامر",
-                question: "ما جزاء من قرأ حرفاً واحداً من كتاب الله عز وجل كما تعلمنا؟",
-                rawOptions: [
-                    "له به حسنة، والحسنة بعشر أمثالها",
-                    "يحصل على حسنة واحدة لا غير",
-                    "لا يحصل على شيء حتى يكمل السورة كاملة"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 25,
-                charName: "ريحان",
-                question: "ما معنى 'الشفاء لما في الصدور' في وصف الله تعالى للقرآن الكريم؟",
-                rawOptions: [
-                    "شفاء أمراض القلوب كالحسد والغل والحزن والخوف والشبهات",
-                    "شفاء الكسور في العظام فقط",
-                    "زيادة سرعة دقات القلب أثناء الجري"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 26,
-                charName: "حنظل",
-                question: "ماذا يقصد بأن القرآن 'حبل الله المتين'؟",
-                rawOptions: [
-                    "من تمسك به وعمل بآياته نجا وهُدي إلى الصراط المستقيم",
-                    "أنه حبل قوي مصنوع من ألياف الصحراء",
-                    "أنه أداة لربط الأمتعة أثناء السفر"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 27,
-                charName: "كامل",
-                question: "كيف تكون صحبة القرآن الكريم في القبر وجميع المواقف الصعبة؟",
-                rawOptions: [
-                    "يأتي القرآن لشفيعه وم صاحبه محاجّاً عنه ومؤنساً له في ظلمات القبر",
-                    "ينساه المصحف فور وفاة الإنسان",
-                    "يترك صاحب القرآن دون نصرة"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 28,
-                charName: "سلمان",
-                question: "ما أول خطوة عملية يجب أن يبدأ بها الطفل حتى لا يكون كسلمان في أول قصته؟",
-                rawOptions: [
-                    "فتح المصحف بانتظام والتعرف على معاني الآيات العظيمة واستخرج كنوزها",
-                    "الانتظار حتى يكبر في السن كلياً",
-                    "عدم محاولة قراءة المصحف إطلاقاً"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 29,
-                charName: "تامر",
-                question: "بماذا يشعر الإنسان عندما يستمع للقرآن الكريم بقلب حاضر وخاشع؟",
-                rawOptions: [
-                    "بالسعادة والسكينة والراحة النفسية العميقة",
-                    "بالخوف الشديد والقلق المستمر",
-                    "بالملل والنوم الفوري"
-                ],
-                correctIndex: 0
-            },
-            {
-                id: 30,
-                charName: "المعلم أكمل",
-                question: "ما الشعار الذي اتفق عليه جميع أبطال قصتنا (سلمان وكامل وتامر وريحان وحنظل والمعلم أكمل)؟",
-                rawOptions: [
-                    "القرآن هو نورنا وكنزنا وعزّنا ونحن أبطاله الحافظون العاملون به!",
-                    "التركيز على اللعب بالهاتف طوال اليوم",
-                    "السفر دائماً في الصحراء بدون خريطة"
-                ],
-                correctIndex: 0
+                evidenceCorrectIndex: 0
             }
         ];
 
-        let preparedQuestions = [];
-        let currentQuestionIndex = 0;
+        /* GAME STATE VARIABLES */
+        let currentLevel = 1; // 1 or 2
+        let preparedLevel1Questions = [];
+        let preparedLevel2Items = [];
+        
+        let currentQIndex = 0;
         let score = 0;
         let isFlipped = false;
         let isAnsweredCurrent = false;
+
+        // Level 2 Sub-step tracking: 1 = Source question, 2 = Evidence question
+        let level2Step = 1;
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -621,13 +641,11 @@
                         o.stop(audioCtx.currentTime + (idx * 0.12) + 0.3);
                     });
                 }
-            } catch(e) {
-                // Sound fallback
-            }
+            } catch(e) {}
         }
 
         window.onload = function() {
-            initGame();
+            initData();
 
             document.getElementById('card-container').addEventListener('click', function(e) {
                 if (!isFlipped) {
@@ -636,57 +654,154 @@
             });
         };
 
-        function prepareQuestionsData() {
-            preparedQuestions = baseQuestions.map(q => {
+        function initData() {
+            prepareData();
+            openModal('modal-start-selection');
+        }
+
+        function selectStartingLevel(selectedLvl) {
+            closeModal('modal-start-selection');
+            currentLevel = selectedLvl;
+            currentQIndex = 0;
+            score = 0;
+            level2Step = 1;
+
+            if (currentLevel === 1) {
+                document.getElementById('level-title-tag').textContent = "المستوى الأول: مراجعة أحداث ومفاهيم القصة";
+                document.getElementById('max-score-tag').textContent = "/ 30";
+            } else {
+                document.getElementById('level-title-tag').textContent = "المستوى الثاني: ربط أماني الأبطال بالأدلة الشرعية";
+                document.getElementById('max-score-tag').textContent = "/ 19";
+            }
+
+            updateHeaderUI();
+            loadCurrentQuestion();
+        }
+
+        function prepareData() {
+            // Level 1
+            preparedLevel1Questions = level1BaseQuestions.map(q => {
                 const correctText = q.rawOptions[q.correctIndex];
-                
                 let shuffledOptions = [...q.rawOptions];
                 for (let i = shuffledOptions.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
                 }
-
-                const newCorrectIndex = shuffledOptions.indexOf(correctText);
-
                 return {
                     id: q.id,
                     charName: q.charName,
                     question: q.question,
                     options: shuffledOptions,
-                    correct: newCorrectIndex
+                    correct: shuffledOptions.indexOf(correctText)
+                };
+            });
+
+            // Level 2
+            preparedLevel2Items = level2BaseData.map((item, idx) => {
+                const sources = ["من القرآن الكريم", "من السنة النبوية", "من كلاهما (القرآن والسنة)"];
+
+                const correctEvidenceText = item.evidenceOptions[item.evidenceCorrectIndex];
+                let shuffledEvidences = [...item.evidenceOptions];
+                for (let i = shuffledEvidences.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledEvidences[i], shuffledEvidences[j]] = [shuffledEvidences[j], shuffledEvidences[i]];
+                }
+
+                return {
+                    id: idx + 1,
+                    hero: item.hero,
+                    wishNumStr: item.wishNumStr,
+                    wishContent: item.wishContent,
+                    sourcesList: sources,
+                    correctSourceIdx: item.sourceCorrectIndex,
+                    evidencesList: shuffledEvidences,
+                    correctEvidenceIdx: shuffledEvidences.indexOf(correctEvidenceText)
                 };
             });
         }
 
-        function initGame() {
-            prepareQuestionsData();
-            currentQuestionIndex = 0;
-            score = 0;
-            updateUI();
-            loadQuestion(currentQuestionIndex);
-        }
-
-        function updateUI() {
+        function updateHeaderUI() {
             document.getElementById('score').textContent = score;
-            const progress = (currentQuestionIndex / preparedQuestions.length) * 100;
+            let totalInLevel = currentLevel === 1 ? preparedLevel1Questions.length : preparedLevel2Items.length;
+            const progress = (currentQIndex / totalInLevel) * 100;
             document.getElementById('progress-bar').style.width = `${progress}%`;
+
+            // Update Previous and Next buttons state
+            const prevBtn = document.getElementById('btn-prev-q');
+            const nextBtn = document.getElementById('btn-next-q');
+
+            prevBtn.disabled = (currentQIndex === 0 && (currentLevel === 1 || level2Step === 1));
+            nextBtn.disabled = (currentQIndex >= totalInLevel - 1 && (currentLevel === 1 || level2Step === 2));
         }
 
-        function loadQuestion(index) {
+        function goToPrevQuestion() {
+            if (currentLevel === 1) {
+                if (currentQIndex > 0) {
+                    currentQIndex--;
+                    loadCurrentQuestion();
+                    updateHeaderUI();
+                }
+            } else {
+                if (level2Step === 2) {
+                    level2Step = 1;
+                    loadCurrentQuestion();
+                    updateHeaderUI();
+                } else if (currentQIndex > 0) {
+                    currentQIndex--;
+                    level2Step = 2;
+                    loadCurrentQuestion();
+                    updateHeaderUI();
+                }
+            }
+        }
+
+        function goToNextQuestion() {
+            let totalInLevel = currentLevel === 1 ? preparedLevel1Questions.length : preparedLevel2Items.length;
+            
+            if (currentLevel === 1) {
+                if (currentQIndex < totalInLevel - 1) {
+                    currentQIndex++;
+                    loadCurrentQuestion();
+                    updateHeaderUI();
+                }
+            } else {
+                if (level2Step === 1) {
+                    level2Step = 2;
+                    loadCurrentQuestion();
+                    updateHeaderUI();
+                } else if (currentQIndex < totalInLevel - 1) {
+                    currentQIndex++;
+                    level2Step = 1;
+                    loadCurrentQuestion();
+                    updateHeaderUI();
+                }
+            }
+        }
+
+        function loadCurrentQuestion() {
             isFlipped = false;
             isAnsweredCurrent = false;
 
             const cardInner = document.getElementById('card-inner');
             cardInner.classList.remove('flipped');
 
-            const q = preparedQuestions[index];
+            if (currentLevel === 1) {
+                loadLevel1Question(currentQIndex);
+            } else {
+                loadLevel2Question(currentQIndex, level2Step);
+            }
+        }
+
+        function loadLevel1Question(index) {
+            const q = preparedLevel1Questions[index];
             document.getElementById('current-question-num').textContent = index + 1;
-            document.getElementById('q-counter').textContent = `${index + 1}/${preparedQuestions.length}`;
+            document.getElementById('card-front-desc').textContent = "اكتشف السؤال واختبر معرفتك الكبيرة بالقصة ومفاهيمها!";
+            document.getElementById('q-counter').textContent = `${index + 1}/${preparedLevel1Questions.length}`;
+            document.getElementById('char-label-tag').textContent = "شخصية السؤال:";
             document.getElementById('char-name').textContent = q.charName;
-            
-            const charImgs = characterImagePathMap[q.charName] || { normal: `images/${q.charName}.jpg`, surprised: `images/${q.charName}.jpg` };
+
+            const charImgs = characterImagePathMap[q.charName] || { normal: `images/${q.charName}.jpg` };
             const imgNormalEl = document.getElementById('char-img-normal');
-            
             imgNormalEl.src = charImgs.normal;
             imgNormalEl.onerror = function() {
                 this.onerror = null;
@@ -700,20 +815,98 @@
 
             q.options.forEach((optText, optIdx) => {
                 const btn = document.createElement('button');
-                btn.className = `game-card-bg hover:opacity-90 text-indigo-950 font-extrabold p-3.5 rounded-2xl shadow-md border-2 border-white/60 hover:border-amber-300 transition-all transform active:scale-95 text-right flex items-center justify-between group`;
+                btn.className = `game-card-bg hover:opacity-90 text-indigo-950 font-extrabold p-3 rounded-2xl shadow-md border-2 border-white/60 hover:border-amber-300 transition-all transform active:scale-95 text-right flex items-center justify-between group`;
                 btn.onclick = (e) => {
                     e.stopPropagation();
-                    handleAnswer(optIdx);
+                    handleAnswerLevel1(optIdx);
                 };
 
                 btn.innerHTML = `
-                    <span class="text-sm md:text-base leading-snug">${optText}</span>
-                    <span class="w-7 h-7 rounded-xl bg-white/70 group-hover:bg-amber-400 group-hover:text-white flex items-center justify-center text-xs font-black shrink-0 mr-2 transition-colors">
+                    <span class="text-xs md:text-sm leading-snug">${optText}</span>
+                    <span class="w-6 h-6 rounded-lg bg-white/70 group-hover:bg-amber-400 group-hover:text-white flex items-center justify-center text-xs font-black shrink-0 mr-2 transition-colors">
                         ${optIdx + 1}
                     </span>
                 `;
                 optionsContainer.appendChild(btn);
             });
+        }
+
+        function loadLevel2Question(index, step) {
+            const item = preparedLevel2Items[index];
+            document.getElementById('current-question-num').textContent = index + 1;
+            document.getElementById('card-front-desc').textContent = "المستوى الثاني: ربط أماني الأبطال بالمصدر والدليل الشرعي!";
+            document.getElementById('q-counter').textContent = `${index + 1}/${preparedLevel2Items.length}`;
+            
+            // Determine hero vs teacher role for clean display tag & dynamic labels
+            const isTeacher = item.hero.includes("المعلم");
+            const charTitleLabel = isTeacher ? item.hero : `البطل ${item.hero}`;
+
+            document.getElementById('char-label-tag').textContent = isTeacher ? "صاحب الأمنية:" : "صاحب الأمنية (البطل):";
+            document.getElementById('char-name').textContent = item.hero;
+
+            const charImgs = characterImagePathMap[item.hero] || { normal: `images/${item.hero}.jpg` };
+            const imgNormalEl = document.getElementById('char-img-normal');
+            imgNormalEl.src = charImgs.normal;
+            imgNormalEl.onerror = function() {
+                this.onerror = null;
+                this.src = `https://placehold.co/150x150/fde047/1e1b4b?text=${encodeURIComponent(item.hero)}`;
+            };
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            if (step === 1) {
+                // Step 1: Source Selection (Clean single title without slash)
+                document.getElementById('question-text').innerHTML = `
+                    <span class="bg-amber-100 text-amber-900 text-xs px-2.5 py-1 rounded-lg border border-amber-300 mb-1 inline-block">السؤال الأول من التحدي</span><br>
+                    هل حقق <span class="text-indigo-600 font-extrabold">${charTitleLabel}</span> أمنيته ${item.wishNumStr}: <br>
+                    <span class="text-purple-900 font-black bg-purple-50 p-2 rounded-xl border border-purple-200 block mt-1">"${item.wishContent}"</span>
+                    <span class="text-xs md:text-sm font-bold text-gray-700 mt-2 block">من القرآن الكريم أم من السنة النبوية أم كلاهما؟</span>
+                `;
+
+                item.sourcesList.forEach((sourceText, sIdx) => {
+                    const btn = document.createElement('button');
+                    btn.className = `game-card-bg hover:opacity-90 text-indigo-950 font-extrabold p-3 rounded-2xl shadow-md border-2 border-white/60 hover:border-amber-300 transition-all transform active:scale-95 text-right flex items-center justify-between group`;
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        handleAnswerLevel2Step1(sIdx);
+                    };
+
+                    btn.innerHTML = `
+                        <span class="text-sm font-black">${sourceText}</span>
+                        <span class="w-6 h-6 rounded-lg bg-white/70 group-hover:bg-amber-400 group-hover:text-white flex items-center justify-center text-xs font-black shrink-0 mr-2">
+                            ${sIdx + 1}
+                        </span>
+                    `;
+                    optionsContainer.appendChild(btn);
+                });
+
+            } else if (step === 2) {
+                // Step 2: Evidence Selection (Clean single title without slash)
+                document.getElementById('question-text').innerHTML = `
+                    <span class="bg-emerald-100 text-emerald-900 text-xs px-2.5 py-1 rounded-lg border border-emerald-300 mb-1 inline-block">السؤال الثاني: حدد الدليل الشرعي الصحيح</span><br>
+                    لإنجاز أمنية <span class="text-indigo-600 font-extrabold">${charTitleLabel}</span> وهي: <br>
+                    <span class="text-emerald-950 font-black bg-emerald-50 p-2 rounded-xl border border-emerald-200 block mt-1">"${item.wishContent}"</span>
+                    <span class="text-xs font-bold text-gray-700 mt-1 block">اختر منطوق الدليل أو الآية/الحديث المطابق بالكامل:</span>
+                `;
+
+                item.evidencesList.forEach((evText, eIdx) => {
+                    const btn = document.createElement('button');
+                    btn.className = `bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-indigo-950 font-extrabold p-3 rounded-2xl shadow-md border-2 border-emerald-200 hover:border-emerald-400 transition-all transform active:scale-95 text-right flex items-center justify-between group`;
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        handleAnswerLevel2Step2(eIdx);
+                    };
+
+                    btn.innerHTML = `
+                        <span class="text-xs md:text-sm leading-relaxed">${evText}</span>
+                        <span class="w-6 h-6 rounded-lg bg-emerald-200 group-hover:bg-emerald-500 group-hover:text-white flex items-center justify-center text-xs font-black shrink-0 mr-2">
+                            ${eIdx + 1}
+                        </span>
+                    `;
+                    optionsContainer.appendChild(btn);
+                });
+            }
         }
 
         function flipCard() {
@@ -723,17 +916,18 @@
             document.getElementById('card-inner').classList.add('flipped');
         }
 
-        function handleAnswer(selectedIndex) {
+        /* LEVEL 1 HANDLER */
+        function handleAnswerLevel1(selectedIndex) {
             if (!isFlipped) {
                 flipCard();
-                setTimeout(() => checkAnswer(selectedIndex), 400);
+                setTimeout(() => checkLevel1Answer(selectedIndex), 400);
             } else {
-                checkAnswer(selectedIndex);
+                checkLevel1Answer(selectedIndex);
             }
         }
 
-        function checkAnswer(selectedIndex) {
-            const q = preparedQuestions[currentQuestionIndex];
+        function checkLevel1Answer(selectedIndex) {
+            const q = preparedLevel1Questions[currentQIndex];
 
             if (selectedIndex === q.correct) {
                 playSound('correct');
@@ -743,34 +937,110 @@
                     document.getElementById('score').textContent = score;
                 }
                 triggerConfetti(60);
-                setTimeout(() => nextQuestionDirectly(), 800);
+                setTimeout(() => nextLevel1Question(), 800);
             } else {
                 playSound('wrong');
-                
-                const charImgs = characterImagePathMap[q.charName] || { normal: `images/${q.charName}.jpg`, surprised: `images/${q.charName}.jpg` };
-                const imgWrongEl = document.getElementById('modal-wrong-img');
-                
-                imgWrongEl.src = charImgs.surprised || charImgs.normal;
-                imgWrongEl.onerror = function() {
-                    this.onerror = null;
-                    this.src = `https://placehold.co/200x200/fca5a5/1e1b4b?text=${encodeURIComponent(q.charName)}`;
-                };
-
-                document.getElementById('modal-wrong-char-name').textContent = q.charName;
-                document.getElementById('modal-wrong-char-inline').textContent = q.charName;
-                
-                openModal('modal-wrong');
+                showWrongModal(q.charName);
             }
         }
 
-        function nextQuestionDirectly() {
-            if (currentQuestionIndex < preparedQuestions.length - 1) {
-                currentQuestionIndex++;
-                updateUI();
-                loadQuestion(currentQuestionIndex);
+        function nextLevel1Question() {
+            if (currentQIndex < preparedLevel1Questions.length - 1) {
+                currentQIndex++;
+                updateHeaderUI();
+                loadCurrentQuestion();
             } else {
+                // End of Level 1 -> Show Level 2 Announcement Banner
+                openModal('modal-banner-level2');
+            }
+        }
+
+        function startLevelTwo() {
+            closeModal('modal-banner-level2');
+            currentLevel = 2;
+            currentQIndex = 0;
+            level2Step = 1;
+
+            document.getElementById('level-title-tag').textContent = "المستوى الثاني: ربط أماني الأبطال بالأدلة الشرعية";
+            document.getElementById('max-score-tag').textContent = "/ 19";
+
+            updateHeaderUI();
+            loadCurrentQuestion();
+        }
+
+        /* LEVEL 2 HANDLERS */
+        function handleAnswerLevel2Step1(selectedIndex) {
+            if (!isFlipped) {
+                flipCard();
+                setTimeout(() => checkLevel2Step1Answer(selectedIndex), 400);
+            } else {
+                checkLevel2Step1Answer(selectedIndex);
+            }
+        }
+
+        function checkLevel2Step1Answer(selectedIndex) {
+            const item = preparedLevel2Items[currentQIndex];
+
+            if (selectedIndex === item.correctSourceIdx) {
+                playSound('correct');
+                triggerConfetti(50);
+                // Move to Step 2 for this item
+                level2Step = 2;
+                setTimeout(() => {
+                    loadLevel2Question(currentQIndex, level2Step);
+                    updateHeaderUI();
+                }, 600);
+            } else {
+                playSound('wrong');
+                showWrongModal(item.hero);
+            }
+        }
+
+        function handleAnswerLevel2Step2(selectedIndex) {
+            checkLevel2Step2Answer(selectedIndex);
+        }
+
+        function checkLevel2Step2Answer(selectedIndex) {
+            const item = preparedLevel2Items[currentQIndex];
+
+            if (selectedIndex === item.correctEvidenceIdx) {
+                playSound('correct');
+                if (!isAnsweredCurrent) {
+                    score++;
+                    isAnsweredCurrent = true;
+                    document.getElementById('score').textContent = score;
+                }
+                triggerConfetti(70);
+                setTimeout(() => nextLevel2Item(), 800);
+            } else {
+                playSound('wrong');
+                showWrongModal(item.hero);
+            }
+        }
+
+        function nextLevel2Item() {
+            if (currentQIndex < preparedLevel2Items.length - 1) {
+                currentQIndex++;
+                level2Step = 1;
+                updateHeaderUI();
+                loadCurrentQuestion();
+            } else {
+                // Grand Victory!
                 showVictoryModal();
             }
+        }
+
+        function showWrongModal(heroName) {
+            const charImgs = characterImagePathMap[heroName] || { normal: `images/${heroName}.jpg` };
+            const imgWrongEl = document.getElementById('modal-wrong-img');
+            imgWrongEl.src = charImgs.normal;
+            imgWrongEl.onerror = function() {
+                this.onerror = null;
+                this.src = `https://placehold.co/200x200/fca5a5/1e1b4b?text=${encodeURIComponent(heroName)}`;
+            };
+
+            document.getElementById('modal-wrong-char-name').textContent = heroName;
+            openModal('modal-wrong');
         }
 
         function showVictoryModal() {
@@ -786,7 +1056,7 @@
 
         function restartGameFromVictory() {
             closeModal('modal-victory');
-            initGame();
+            openModal('modal-start-selection');
         }
 
         function openModal(id) {

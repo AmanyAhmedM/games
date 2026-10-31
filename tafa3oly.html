@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة: رحلة البطل اللبيب - أحسن الناس عملاً</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cairo & Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti for Celebration Effects -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #064e3b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            user-select: none;
+        }
+        .glow-gold {
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
+        }
+        .bounce-gentle {
+            animation: bounceGentle 2s infinite;
+        }
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .envelope-shake {
+            animation: envelopeShake 2.5s infinite ease-in-out;
+        }
+        @keyframes envelopeShake {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            20% { transform: rotate(-3deg) scale(1.03); }
+            40% { transform: rotate(3deg) scale(1.03); }
+            60% { transform: rotate(-2deg) scale(1.02); }
+            80% { transform: rotate(2deg) scale(1.02); }
+        }
+    </style>
+</head>
+<body x-data="gameData()" class="min-h-screen flex flex-col justify-between overflow-x-hidden antialiased">
+
+    <!-- Audio Element for Recitation (Alafasy Quran Surah Mulk Verses 1-2) -->
+    <audio id="quranAudio" preload="auto">
+        <source src="https://server8.mp3quran.net/afs/067.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Toast Notification Overlay -->
+    <div x-show="toast.show" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform -translate-y-4 scale-95"
+         x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 transform translate-y-0 scale-100"
+         x-transition:leave-end="opacity-0 transform -translate-y-4 scale-95"
+         class="fixed top-5 left-1/2 -translate-x-1/2 z-50 max-w-md w-11/12 bg-slate-900/95 border-2 rounded-2xl p-4 flex items-center gap-3 shadow-2xl backdrop-blur-md"
+         :class="toast.type === 'success' ? 'border-amber-400 text-amber-300' : 'border-rose-500 text-rose-300'"
+         style="display: none;">
+        <div class="text-3xl flex-shrink-0" x-html="toast.icon"></div>
+        <div class="flex-grow">
+            <h4 class="font-extrabold text-base text-white" x-text="toast.title"></h4>
+            <p class="text-xs text-slate-300" x-text="toast.message"></p>
+        </div>
+        <button @click="toast.show = false" class="text-slate-400 hover:text-white text-lg px-2">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    <!-- Top Game Navigation Header (Hidden in Welcome & Envelope Screens) -->
+    <header x-show="gameStage === 'playing'" x-transition class="bg-slate-900/90 backdrop-blur-lg border-b border-slate-700 sticky top-0 z-40 px-4 py-3 shadow-lg">
+        <div class="max-w-5xl mx-auto flex flex-wrap justify-between items-center gap-3">
+            
+            <!-- Player Name & Avatar -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-tr from-amber-400 to-amber-200 text-slate-950 rounded-2xl flex items-center justify-center font-black text-xl shadow-md glow-gold">
+                    👑
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-black text-white" x-text="`البطل اللبيب / ${playerName}`"></h1>
+                    <p class="text-xs text-emerald-400 font-bold">سورة الملك: أحسن الناس عملاً</p>
+                </div>
+            </div>
+
+            <!-- Lives & Scoreboard -->
+            <div class="flex items-center gap-4 bg-slate-800/90 border border-slate-700 px-4 py-2 rounded-2xl shadow-inner">
+                <!-- Hearts / Lives -->
+                <div class="flex items-center gap-1">
+                    <template x-for="i in 3" :key="i">
+                        <i class="fa-solid fa-heart text-lg" :class="i <= lives ? 'text-rose-500 animate-pulse' : 'text-slate-600'"></i>
+                    </template>
+                </div>
+                <div class="h-5 w-px bg-slate-700"></div>
+                <!-- Score -->
+                <div class="flex items-center gap-1.5 text-amber-400 font-extrabold text-lg">
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <span x-text="score"></span>
+                    <span class="text-xs text-slate-400 font-normal">نقاط</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Question Progress Bar -->
+        <div class="max-w-5xl mx-auto mt-2 bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700/50">
+            <div class="bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400 h-full transition-all duration-500 rounded-full"
+                 :style="`width: ${((currentQuestionIndex) / questions.length) * 100}%`"></div>
+        </div>
+    </header>
+
+    <!-- Main Game Viewport -->
+    <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full flex flex-col justify-center">
+
+        <!-- SCREEN 1: ENVELOPE GIFT SCREEN -->
+        <div x-show="gameStage === 'envelope'" x-transition class="text-center space-y-8 py-6">
+            <div class="max-w-md mx-auto bg-slate-900/90 border-2 border-amber-400/60 p-8 rounded-3xl shadow-2xl relative overflow-hidden backdrop-blur-lg">
+                <span class="bg-amber-400 text-slate-950 font-black text-xs px-4 py-1 rounded-full uppercase">هدية إلهية خاصة</span>
+                
+                <!-- Gift Envelope Button -->
+                <div @click="openEnvelope()" class="my-8 cursor-pointer transform hover:scale-105 transition duration-300">
+                    <div class="w-40 h-40 mx-auto bg-gradient-to-tr from-amber-500 via-amber-300 to-amber-100 rounded-3xl shadow-2xl flex flex-col items-center justify-center border-4 border-amber-200 envelope-shake relative group glow-gold">
+                        <div class="text-6xl mb-1">✉️</div>
+                        <div class="font-black text-slate-950 text-sm px-2 text-center">اضغط لفتح الهدية!</div>
+                        <div class="absolute -top-3 -right-3 bg-rose-500 text-white font-bold text-xs px-2.5 py-1 rounded-full animate-bounce shadow">
+                            انقر هنا 🎁
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="text-2xl font-black text-amber-300 mb-2">هذه هديتي تقبلها من...</h2>
+                <p class="text-slate-300 text-sm mb-6">اكتب اسمك الكريم يا بطل وافتتح الهدية بسماع تلاوة سورة الملك!</p>
+
+                <!-- Player Name Input -->
+                <div class="space-y-4">
+                    <input type="text" x-model="playerName" placeholder="اكتب اسمك هنا يا بطل..." 
+                           class="w-full bg-slate-800 border-2 border-amber-400/80 rounded-2xl px-5 py-3.5 text-center text-white font-bold placeholder-slate-500 focus:outline-none focus:border-amber-300 transition text-lg">
+                    
+                    <button @click="openEnvelope()" class="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:scale-102 active:scale-98 text-slate-950 font-black text-lg py-3.5 rounded-2xl shadow-xl transition border border-amber-200 cursor-pointer">
+                        🔓 افتح الظرف واسمع الهدية!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: RECITATION & LESSON INTRO -->
+        <div x-show="gameStage === 'recitation'" x-transition class="text-center space-y-6 py-6">
+            <div class="bg-slate-900/90 border-2 border-emerald-400/60 p-8 rounded-3xl shadow-2xl max-w-2xl mx-auto space-y-6">
+                <div class="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-400 text-emerald-300 rounded-full flex items-center justify-center mx-auto text-4xl animate-pulse">
+                    📖
+                </div>
+
+                <div class="space-y-2">
+                    <span class="text-emerald-400 font-bold text-sm">تلاوة ترتيلية بصوت الشيخ مشاري العفاسي</span>
+                    <h3 class="text-2xl md:text-3xl font-black text-amber-300">سورة الملك (الآيات 1 - 2)</h3>
+                </div>
+
+                <!-- Recitation Verses Display -->
+                <div class="bg-slate-800/90 border border-slate-700 p-6 rounded-2xl space-y-4 text-emerald-200 font-tajawal text-lg md:text-xl leading-loose shadow-inner">
+                    <p class="font-bold">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+                    <p>﴿تَبَارَكَ الَّذِي بِيَدِهِ الْمُلْكُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ ۝ الَّذِي خَلَقَ الْمَوْتَ وَالْحَيَاةَ لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًا وَهُوَ الْعَزِيزُ الْغَفُورُ﴾</p>
+                </div>
+
+                <!-- Audio Controls -->
+                <div class="flex justify-center items-center gap-4 pt-2">
+                    <button @click="toggleAudio()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg flex items-center gap-2 transition">
+                        <i class="fa-solid" :class="isPlayingAudio ? 'fa-pause' : 'fa-play'"></i>
+                        <span x-text="isPlayingAudio ? 'إيقاف التلاوة' : 'تشغيل التلاوة'"></span>
+                    </button>
+                </div>
+
+                <div class="pt-4 border-t border-slate-800">
+                    <button @click="startGameplay()" class="bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:scale-105 active:scale-95 text-slate-950 font-black text-xl px-10 py-4 rounded-2xl shadow-2xl transition border-2 border-amber-200 cursor-pointer glow-gold">
+                        🚀 ابدأ المسابقة والتحدي (12 سؤالاً)!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: GAMEPLAY (12 QUESTIONS) -->
+        <div x-show="gameStage === 'playing'" x-transition class="space-y-6">
+            
+            <template x-for="(q, index) in questions" :key="q.id">
+                <div x-show="currentQuestionIndex === index" class="bg-slate-900/90 border border-slate-700 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+                    
+                    <!-- Question Header & Badge -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-4">
+                        <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 font-black text-xs px-3 py-1.5 rounded-full" x-text="`السؤال ${index + 1} من ${questions.length}`"></span>
+                        <span class="text-xs text-slate-400 font-bold">10 نقاط عند الإجابة الصحيحة ⭐</span>
+                    </div>
+
+                    <!-- Scenario Question Card -->
+                    <div class="flex items-start gap-4 bg-slate-800/80 p-5 rounded-2xl border border-slate-700">
+                        <div class="text-4xl flex-shrink-0" x-text="q.emoji"></div>
+                        <div class="space-y-1">
+                            <h3 class="text-xl md:text-2xl font-black text-white leading-snug" x-text="q.question"></h3>
+                            <p class="text-slate-300 text-sm leading-relaxed" x-text="q.subtext"></p>
+                        </div>
+                    </div>
+
+                    <!-- Choices Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <template x-for="(option, optIdx) in q.options" :key="optIdx">
+                            <button @click="answerQuestion(q, optIdx)"
+                                    :disabled="q.answered"
+                                    :class="{
+                                        'bg-slate-800 border-slate-700 hover:border-amber-400 hover:bg-slate-750 text-white': !q.answered,
+                                        'bg-emerald-950 border-emerald-400 text-emerald-200 font-black': q.answered && optIdx === q.correct,
+                                        'bg-rose-950 border-rose-500 text-rose-200 opacity-70': q.answered && optIdx !== q.correct && q.userChoice === optIdx
+                                    }"
+                                    class="p-5 rounded-2xl border-2 text-right transition-all duration-200 flex items-center justify-between cursor-pointer space-x-3 space-x-reverse font-bold text-base md:text-lg">
+                                <span x-text="option"></span>
+                                <i x-show="q.answered && optIdx === q.correct" class="fa-solid fa-circle-check text-emerald-400 text-xl flex-shrink-0"></i>
+                                <i x-show="q.answered && optIdx !== q.correct && q.userChoice === optIdx" class="fa-solid fa-circle-xmark text-rose-400 text-xl flex-shrink-0"></i>
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Feedback & Explanation Footer -->
+                    <div x-show="q.answered" x-transition class="p-5 rounded-2xl font-bold bg-slate-800/90 border border-slate-700 space-y-3">
+                        <p :class="q.isCorrect ? 'text-amber-300' : 'text-rose-300'" class="text-base" x-text="q.isCorrect ? '🎉 إجابة رائعة وصحيحة! حصلت على 10 نقاط!' : '💔 للأسف إجابة خاطئة! خسرت فرصة حياة واحدة.'"></p>
+                        <p class="text-slate-300 text-sm font-normal leading-relaxed" x-text="q.explanation"></p>
+                        
+                        <div class="pt-2 flex justify-end">
+                            <button @click="nextQuestion()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-6 py-2.5 rounded-xl shadow-lg transition">
+                                <span x-text="currentQuestionIndex < questions.length - 1 ? 'السؤال التالي ➔' : 'إنهاء وتتويج البطل 👑'"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </template>
+
+        </div>
+
+        <!-- SCREEN 4: GAME OVER SCREEN -->
+        <div x-show="gameStage === 'gameover'" x-transition class="text-center space-y-8 py-8">
+            <div class="bg-slate-900/90 border-4 border-rose-500 rounded-3xl p-8 max-w-lg mx-auto shadow-2xl space-y-6">
+                <div class="text-6xl animate-bounce">💔</div>
+                <h2 class="text-3xl font-black text-rose-400">حاول مرة أخرى يا بطل!</h2>
+                <p class="text-slate-300 text-base">نفدت جميع فرص الحياة لديك، ولكن البطل اللبيب لا يستسلم أبداً! أعد المحاولة لتتعلم من أخطائك وتفوز بالعلامة الكاملة.</p>
+                <button @click="restartGame()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-8 py-3 rounded-2xl shadow-xl transition cursor-pointer">
+                    🔄 إعادة المحاولة من الجديد
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 5: VICTORY & CHAMPION CROWNING -->
+        <div x-show="gameStage === 'victory'" x-transition class="text-center space-y-8 py-6">
+            <div class="bg-slate-900/95 border-4 border-amber-400 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden max-w-3xl mx-auto space-y-6 glow-gold">
+                
+                <div class="w-32 h-32 bg-gradient-to-tr from-amber-400 to-amber-200 text-slate-950 rounded-full flex items-center justify-center mx-auto text-6xl font-black shadow-2xl border-4 border-white bounce-gentle">
+                    👑
+                </div>
+                
+                <div class="space-y-2">
+                    <span class="bg-emerald-500 text-slate-950 font-black text-xs px-4 py-1 rounded-full uppercase">تتويج البطل اللبيب</span>
+                    <h2 class="text-3xl md:text-5xl font-black text-amber-300 mt-2">
+                        مبارك للبطل اللبيب / <span x-text="playerName" class="text-white underline decoration-amber-400"></span>
+                    </h2>
+                    <p class="text-slate-200 text-base md:text-lg max-w-xl mx-auto leading-relaxed pt-2">
+                        لقد أثبتّ بذكائك وإتقانك أنك تستحق وسام التميز والتتويج في رحلة تدبر سورة الملك!
+                    </p>
+                </div>
+
+                <!-- Scorecard -->
+                <div class="bg-slate-800/90 border border-slate-700 p-6 rounded-2xl max-w-md mx-auto shadow-inner space-y-3">
+                    <div class="text-slate-400 text-sm font-bold">النتيجة النهائية للبطل:</div>
+                    <div class="text-5xl font-black text-amber-400" x-text="`${score} / 120`"></div>
+                    <div class="text-xs text-emerald-400 font-bold">🏆 أحسن الناس عملاً 🏆</div>
+                </div>
+
+                <div class="pt-4 flex flex-wrap justify-center gap-4">
+                    <button @click="restartGame()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:scale-105 text-slate-950 font-black px-8 py-3.5 rounded-2xl shadow-xl transition cursor-pointer">
+                        🔄 لعب رحلة جديدة
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900/60 border-t border-slate-800 text-slate-400 text-xs py-3 text-center">
+        مشروع تفاعلي تعليمي لتربية الأبطال وتدبر سورة الملك (الآيات 1-2)
+    </footer>
+
+    <!-- Game Logic via Alpine.js -->
+    <script>
+        function gameData() {
+            return {
+                gameStage: 'envelope', // 'envelope', 'recitation', 'playing', 'gameover', 'victory'
+                playerName: '',
+                lives: 3,
+                score: 0,
+                currentQuestionIndex: 0,
+                isPlayingAudio: false,
+                toast: { show: false, title: '', message: '', type: 'success', icon: '🌟' },
+
+                // 12 Comprehensive Questions (10 Points Each) based on the uploaded curriculum
+                questions: [
+                    {
+                        id: 1,
+                        emoji: '🌍',
+                        question: 'لماذا أتينا إلى هذه الدنيا وخلقنا الله تعالى؟',
+                        subtext: 'تذكر المنطوق والمفهوم المراد غرسه من الآية الأولى.',
+                        options: [
+                            'للأكل والشرب واللعب فقط بدون هدف',
+                            'في رحلة اختبار ومسابقة لنثبت من منا أحسن عملاً',
+                            'خلقنا الله عبثاً وبلا حكمة'
+                        ],
+                        correct: 1,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '💡 أتينا في رحلة اختبار حقيقية ومسابقة عظيمة لنثبت من منا سيكون أفضل وأحسن في أعماله وأقواله.'
+                    },
+                    {
+                        id: 2,
+                        emoji: '📖',
+                        question: 'ما هي أول خطوة وأعظم بداية للتعامل مع رسالات الله وكتابه العظيم؟',
+                        subtext: 'تذكر أدب التعامل مع القران الكريم.',
+                        options: [
+                            'القراءة السريعة جداً بدون إنصات',
+                            'التلاوة الترتيلية والاستماع بقلب حاضر خاشع',
+                            'ترك المصحف مقفلاً'
+                        ],
+                        correct: 1,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '📖 التلاوة الترتيلية والاستماع بإنصات يفتحان أبواب الفهم والقلوب لاستقبال النور والرحمة.'
+                    },
+                    {
+                        id: 3,
+                        emoji: '✉️',
+                        question: 'كيف يتصرف الطفل "اللبيب" (الذكي) عندما تصله رسالة من الله؟',
+                        subtext: 'مفهوم تعامل اللبيب مع القرآن الكريم.',
+                        options: [
+                            'يتعامل معها كأي كتاب عادي',
+                            'يعلم أنها رسالة شخصية موجهة إليه فيستعد بقلبه وعقله للعمل بها',
+                            'يقرؤها بدون أن يحاول فهمها'
+                        ],
+                        correct: 1,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '✉️ اللبيب يعلم أن القرآن رسائل إلهية شخصية وخاصة موجهة إليه من رب العالمين ليطبقها.'
+                    },
+                    {
+                        id: 4,
+                        emoji: '✨',
+                        question: 'ما معنى كلمة (تَبَارَكَ) في قوله تعالى: (تَبَارَكَ الَّذِي بِيَدِهِ الْمُلْكُ)؟',
+                        subtext: 'شرح معاني الآية الأولى تفصيلياً.',
+                        options: [
+                            'صاحب البركات الكثيرة والخير الواسع الذي لا ينقطع أبداً',
+                            'الذي يملك الأشياء القليلة فقط',
+                            'الشيء البسيط المحدود'
+                        ],
+                        correct: 0,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '✨ (تبارك) تعني كثرت بركاته وخيراته الواسعة التي لا تنقطع أبداً ويشمل بها كل مخلوقاته.'
+                    },
+                    {
+                        id: 5,
+                        emoji: '🌱',
+                        question: 'ما الفرق بين "الخلق الإلهي" و "الصنع البشري"؟',
+                        subtext: 'الفرق بين المخلوقات والمصنوعات.',
+                        options: [
+                            'الخلق والإنسان يفعلان نفس الشيء بالضبط',
+                            'الخلق هو إيجاد الشيء من العدم لله وحده، أما الصنع فهو تركيب مواد موجودة',
+                            'الصنع يكون من العدم والخلق بتركيب المواد'
+                        ],
+                        correct: 1,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '🌿 الله هو الخالق الوحيد الذي يوجد المخلوقات من العدم، بينما الإنسان يصنع بتعديل وتجميع المواد.'
+                    },
+                    {
+                        id: 6,
+                        emoji: '🕊️',
+                        question: 'ما هو السر الخفي العظيم الذي جعله الله في أجسادنا لكي نتحرك ونفرح ونعيش؟',
+                        subtext: 'تأسيس مفهوم الروح والموت والحياة.',
+                        options: [
+                            'الحديد والصلب',
+                            'الروح',
+                            'البطارية الكهربائية'
+                        ],
+                        correct: 1,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '🕊️ الروح هي السر الإلهي الخفي الذي تحيى به الأجساد، والموت هو خروج هذه الروح لتعود إلى خالقها.'
+                    },
+                    {
+                        id: 7,
+                        emoji: '🎯',
+                        question: 'ما معنى كلمة (لِيَبْلُوَكُمْ) في الآية الكريمة؟',
+                        subtext: 'معنى البلاء والاختبار.',
+                        options: [
+                            'ليضايقكم ويعاقبكم',
+                            'ليختبركم ويمتحنكم في أفعالكم وأخلاقكم',
+                            'ليتفرج عليكم فقط'
+                        ],
+                        correct: 1,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '🎯 (ليبلوكم) أي ليختبركم ويمتحنكم لتظهروا أفضل ما عندكم وتستحقوا الجائزة العظيمة وهي الجنة.'
+                    },
+                    {
+                        id: 8,
+                        emoji: '🪞',
+                        question: 'ماذا تستشعر عندما تقرأ كلمة (أَيُّكُمْ) في سورة الملك؟',
+                        subtext: 'المسؤولية الفردية والخطاب المباشر.',
+                        options: [
+                            'أن الخطاب موجه للمجموعات ولا يعنيني أنا',
+                            'أن الخطاب موجه لي أنا بالذات وأني مسؤول عن صحيفتي الشخصية',
+                            'أن أقلد الآخرين حتى لو أخطأوا'
+                        ],
+                        correct: 1,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '🪞 (أيكُم) تشعرنا بالمسؤولية الفردية، فكل طفل منا يختبره الله بعينه ومسجل باسمه صحيفته.'
+                    },
+                    {
+                        id: 9,
+                        emoji: '⭐',
+                        question: 'ما هما الشرطان الأساسيان لكي يكون عملنا (أَحْسَنَ عَمَلًا) عند الله؟',
+                        subtext: 'شرطا قبول العمل عند الله.',
+                        options: [
+                            '1. السرعة الشديدة 2. الكثرة بدون ترتيب',
+                            '1. الإخلاص لله وحده 2. المتابعة لسنّة النبي محمد ﷺ (الصواب)',
+                            '1. أن يمدحنا الناس 2. أن نفعل ما نريد'
+                        ],
+                        correct: 1,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '⭐ يكون العمل أحسن عمل إذا تحقق فيه: الإخلاص لله (ابتغاء مرضاته) والمتابعة لرسول الله ﷺ.'
+                    },
+                    {
+                        id: 10,
+                        emoji: '❤️',
+                        question: 'كلمة (عَمَلًا) شاملة لكل ما يخرج منا، فما الفرق بين العمل الظاهر والباطن؟',
+                        subtext: 'شمولية مفهوم العمل.',
+                        options: [
+                            'الظاهر بالجوارح كالصلوات والابتسامة، والباطن بالقلب كالمحبة والصبر',
+                            'الظاهر هو الكلام والباطن هو الجري فقط',
+                            'لا يوجد فرق بين القلب والجوارح'
+                        ],
+                        correct: 0,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '❤️ العمل يشمل أفعال الجوارح الظاهرة (كالصلاة) وأعمال القلوب الباطنة (كالمحبة والإخلاص ونظافة القلب).'
+                    },
+                    {
+                        id: 11,
+                        emoji: '🛡️',
+                        question: 'ما معنى اسم الله (الْعَزِيزُ)؟',
+                        subtext: 'معنى اسم الله العزيز.',
+                        options: [
+                            'الضعيف الذي يستعين بالمخلوقين',
+                            'القوي العظيم صاحب الشرف والغلبة الذي لا يُغلب ولا يقدر عليه أحد',
+                            'الذي يسامح بدون قدرة'
+                        ],
+                        correct: 1,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '🛡️ العزيز هو القوي العظيم صاحب الغلبة الكاملة، فمن اعتز بالله العزيز لا يضعف أبداً.'
+                    },
+                    {
+                        id: 12,
+                        emoji: '🤝',
+                        question: 'لماذا اقترن اسم الله (الْعَزِيزُ) باسمه (الْغَفُورُ) في نهاية الآية؟',
+                        subtext: 'سر الاقتران بين العزيز والغفور.',
+                        options: [
+                            'لأن مغفرته سبحانه عن قدرة وعزة ورحمة واسعة وليست عن عجز',
+                            'لأنهما كلمتان متشابهتان فقط',
+                            'لأن الإنسان ينسى كثيراً'
+                        ],
+                        correct: 0,
+                        answered: false,
+                        userChoice: null,
+                        isCorrect: false,
+                        explanation: '🌟 مغفرة الله سبحانه ليست عن عجز بل عن كمال قدرة وعزة ورحمة واسعة لمن استغفر وتاب.'
+                    }
+                ],
+
+                // Methods
+                openEnvelope() {
+                    if (!this.playerName.trim()) {
+                        this.playerName = 'أحد الأبطال';
+                    }
+                    this.gameStage = 'recitation';
+                    this.playAudio();
+                    this.triggerConfetti();
+                    this.showToast('مرحباً بك يا بطل!', `أهلاً بك يا ${this.playerName}، تقبل هديتك واستمع للقرآن.`, 'success', '🎁');
+                },
+
+                playAudio() {
+                    const audio = document.getElementById('quranAudio');
+                    if (audio) {
+                        audio.play().then(() => {
+                            this.isPlayingAudio = true;
+                        }).catch(() => {
+                            this.isPlayingAudio = false;
+                        });
+                    }
+                },
+
+                toggleAudio() {
+                    const audio = document.getElementById('quranAudio');
+                    if (audio) {
+                        if (this.isPlayingAudio) {
+                            audio.pause();
+                            this.isPlayingAudio = false;
+                        } else {
+                            audio.play();
+                            this.isPlayingAudio = true;
+                        }
+                    }
+                },
+
+                startGameplay() {
+                    const audio = document.getElementById('quranAudio');
+                    if (audio) audio.pause();
+                    this.isPlayingAudio = false;
+
+                    this.gameStage = 'playing';
+                    this.showToast('بداية المسابقة!', 'أجب بذكاء واجمع 10 نقاط في كل سؤال.', 'success', '🚀');
+                },
+
+                answerQuestion(question, optionIdx) {
+                    question.answered = true;
+                    question.userChoice = optionIdx;
+
+                    if (optionIdx === question.correct) {
+                        question.isCorrect = true;
+                        this.score += 10;
+                        this.triggerConfetti(); // Immediate celebration on correct answer
+                        this.showToast('إجابة ممتازة! 🎉', 'أحسنت يا بطل، حصلت على +10 نقاط!', 'success', '⭐');
+                    } else {
+                        question.isCorrect = false;
+                        this.lives--;
+                        this.showToast('إجابة خاطئة! 💔', 'خسرت فرصة حياة واحدة، ركز في السؤال التالي.', 'error', '💔');
+
+                        if (this.lives <= 0) {
+                            setTimeout(() => {
+                                this.gameStage = 'gameover';
+                            }, 1500);
+                        }
+                    }
+                },
+
+                nextQuestion() {
+                    if (this.lives <= 0) return;
+
+                    if (this.currentQuestionIndex < this.questions.length - 1) {
+                        this.currentQuestionIndex++;
+                    } else {
+                        this.gameStage = 'victory';
+                        this.triggerConfetti();
+                    }
+                },
+
+                restartGame() {
+                    window.location.reload();
+                },
+
+                showToast(title, message, type = 'success', icon = '🌟') {
+                    this.toast.title = title;
+                    this.toast.message = message;
+                    this.toast.type = type;
+                    this.toast.icon = icon;
+                    this.toast.show = true;
+                    setTimeout(() => {
+                        this.toast.show = false;
+                    }, 3500);
+                },
+
+                triggerConfetti() {
+                    if (typeof confetti === 'function') {
+                        confetti({
+                            particleCount: 80,
+                            spread: 80,
+                            origin: { y: 0.6 }
+                        });
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
